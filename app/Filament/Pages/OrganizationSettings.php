@@ -55,6 +55,14 @@ class OrganizationSettings extends Page implements HasForms
             'logo_path' => $this->org->logo_path ?? null,
             'is_verified' => $this->org->is_verified ?? false,
             'meta_json' => isset($this->org->meta_json) ? json_encode($this->org->meta_json, JSON_PRETTY_PRINT) : null,
+            'payments' => [
+                'midtrans' => [
+                    'is_production' => (bool)($this->org->meta_json['payments']['midtrans']['is_production'] ?? false),
+                    'server_key' => $this->org->meta_json['payments']['midtrans']['server_key'] ?? null,
+                    'client_key' => $this->org->meta_json['payments']['midtrans']['client_key'] ?? null,
+                    'merchant_id' => $this->org->meta_json['payments']['midtrans']['merchant_id'] ?? null,
+                ],
+            ],
             'social' => $this->org?->social_json ?? [
                 'website' => null,
                 'instagram' => null,
@@ -139,6 +147,33 @@ class OrganizationSettings extends Page implements HasForms
                             ->rule('json'),
                     ]),
 
+                Section::make('Pembayaran')
+                    ->columns(2)
+                    ->schema([
+                        Fieldset::make('Midtrans')
+                            ->columns(2)
+                            ->schema([
+                                Toggle::make('payments.midtrans.is_production')
+                                    ->label('Mode Production')
+                                    ->helperText('Nonaktifkan untuk sandbox/test.')
+                                    ->inline(false),
+                                TextInput::make('payments.midtrans.merchant_id')
+                                    ->label('Merchant ID')
+                                    ->maxLength(255),
+                                TextInput::make('payments.midtrans.server_key')
+                                    ->label('Server Key')
+                                    ->password()
+                                    ->revealable()
+                                    ->maxLength(255)
+                                    ->columnSpanFull(),
+                                TextInput::make('payments.midtrans.client_key')
+                                    ->label('Client Key')
+                                    ->maxLength(255)
+                                    ->columnSpanFull(),
+                            ])
+                            ->columnSpanFull(),
+                    ]),
+
                 Section::make('Homepage')
                     ->columns(2)
                     ->schema([
@@ -189,6 +224,19 @@ class OrganizationSettings extends Page implements HasForms
             if (is_array($decoded)) {
                 $meta = $decoded;
             }
+        }
+        // Overlay structured payment settings into meta_json
+        if (isset($state['payments']['midtrans']) && is_array($state['payments']['midtrans'])) {
+            $mt = $state['payments']['midtrans'];
+            if (! isset($meta['payments'])) {
+                $meta['payments'] = [];
+            }
+            $meta['payments']['midtrans'] = array_merge($meta['payments']['midtrans'] ?? [], [
+                'is_production' => (bool)($mt['is_production'] ?? false),
+                'server_key' => $mt['server_key'] ?? null,
+                'client_key' => $mt['client_key'] ?? null,
+                'merchant_id' => $mt['merchant_id'] ?? null,
+            ]);
         }
         if (isset($state['hero_campaign_ids']) && is_array($state['hero_campaign_ids'])) {
             $ids = array_values(array_filter($state['hero_campaign_ids']));

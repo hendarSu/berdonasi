@@ -25,12 +25,39 @@ class LedgerEntryResource extends Resource
     {
         return $table
             ->columns([
+                 Tables\Columns\TextColumn::make('created_at')
+                    ->label('Tanggal Transaksi')
+                    ->dateTime(),
                 Tables\Columns\TextColumn::make('wallet.owner_type')
                     ->label('Owner Type')
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('wallet.owner.title')
-                    ->label('Campaign')
-                    ->getStateUsing(fn ($record) => optional(optional($record->wallet->owner)->title))
+                    ->label('Organisasi')
+                    ->getStateUsing(function ($record) {
+                        $owner = optional($record->wallet)->owner;
+                        return $owner->title ?? $owner->name ?? null;
+                    })
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('donor')
+                    ->label('Donatur')
+                    ->getStateUsing(function ($record) {
+                        if ($record->source_type === \App\Models\Donation::class) {
+                            $donation = $record->source; // morphTo
+                            if (! $donation) return null;
+                            return $donation->is_anonymous ? 'Anonim' : ($donation->donor_name ?: '—');
+                        }
+                        return null;
+                    })
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('source_campaign')
+                    ->label('Campaign (Sumber)')
+                    ->getStateUsing(function ($record) {
+                        if ($record->source_type === \App\Models\Donation::class) {
+                            return optional(optional($record->source)->campaign)->title;
+                        }
+                        return null;
+                    })
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('type')
                     ->badge()
@@ -41,8 +68,7 @@ class LedgerEntryResource extends Resource
                 Tables\Columns\TextColumn::make('amount')
                     ->label('Amount')
                     ->formatStateUsing(fn ($state) => 'Rp ' . number_format((float) $state, 2, ',', '.')),
-                Tables\Columns\TextColumn::make('memo')->limit(40),
-                Tables\Columns\TextColumn::make('created_at')->dateTime(),
+                // Tables\Columns\TextColumn::make('memo')->limit(40),
                 Tables\Columns\TextColumn::make('balance_after')
                     ->label('Balance After')
                     ->formatStateUsing(fn ($state) => 'Rp ' . number_format((float) $state, 2, ',', '.'))
@@ -66,4 +92,3 @@ class LedgerEntryResource extends Resource
         ];
     }
 }
-

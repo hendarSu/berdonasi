@@ -29,7 +29,8 @@ class CampaignController extends Controller
 
         $donations = Donation::query()
             ->where('campaign_id', $campaign->id)
-            ->orderByDesc('created_at')
+            ->where('status', 'paid')
+            ->orderByDesc('paid_at')
             ->paginate(10)
             ->withQueryString();
 
@@ -69,6 +70,6 @@ class CampaignController extends Controller
             'created_at' => now(),
         ]);
 
-        return redirect()->route('donation.thanks', ['reference' => $donation->reference]);
+        return redirect()->route('donation.pay', ['reference' => $donation->reference]);
     }
 }

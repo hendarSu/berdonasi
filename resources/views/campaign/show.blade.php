@@ -145,7 +145,7 @@
                                                 <tr>
                                                     <td class="px-3 py-2">{{ $d->is_anonymous ? 'Anonim' : ($d->donor_name ?: '—') }}</td>
                                                     <td class="px-3 py-2">Rp {{ number_format((float)$d->amount, 2, ',', '.') }}</td>
-                                                    <td class="px-3 py-2">{{ optional($d->created_at)->format('d M Y H:i') }}</td>
+                                                    <td class="px-3 py-2">{{ optional($d->paid_at)->format('d M Y H:i') }}</td>
                                                 </tr>
                                             @endforeach
                                         </tbody>

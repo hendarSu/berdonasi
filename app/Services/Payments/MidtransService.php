@@ -1,0 +1,156 @@
+<?php
+
+namespace App\Services\Payments;
+
+use App\Models\Donation;
+use App\Models\Organization;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
+
+class MidtransService
+{
+    public function __construct(
+        protected ?Organization $org = null,
+    ) {
+        $this->org = $this->org ?: Organization::query()->first();
+    }
+
+    public function isProduction(): bool
+    {
+        $org = $this->org;
+        $meta = $org?->meta_json ?? [];
+        return (bool) Arr::get($meta, 'payments.midtrans.is_production', (bool) env('MIDTRANS_IS_PRODUCTION', false));
+    }
+
+    public function serverKey(): string
+    {
+        $meta = $this->org?->meta_json ?? [];
+        return (string) Arr::get($meta, 'payments.midtrans.server_key', env('MIDTRANS_SERVER_KEY', ''));
+    }
+
+    public function clientKey(): string
+    {
+        $meta = $this->org?->meta_json ?? [];
+        return (string) Arr::get($meta, 'payments.midtrans.client_key', env('MIDTRANS_CLIENT_KEY', ''));
+    }
+
+    public function merchantId(): ?string
+    {
+        $meta = $this->org?->meta_json ?? [];
+        return Arr::get($meta, 'payments.midtrans.merchant_id');
+    }
+
+    public function snapJsUrl(): string
+    {
+        return $this->isProduction()
+            ? 'https://app.midtrans.com/snap/snap.js'
+            : 'https://app.sandbox.midtrans.com/snap/snap.js';
+    }
+
+    protected function snapApiBase(): string
+    {
+        return $this->isProduction()
+            ? 'https://app.midtrans.com/snap/v1'
+            : 'https://app.sandbox.midtrans.com/snap/v1';
+    }
+
+    public function createSnapTransaction(Donation $donation): array
+    {
+        $campaign = $donation->campaign()->first();
+        $orderId = $donation->reference;
+        // Ensure integer rupiah value and use same number for item_details
+        $itemPrice = max(1, (int) round((float) $donation->amount));
+        $qty = 1;
+        $grossAmount = $itemPrice * $qty;
+        // Midtrans item name limit is 50 chars
+        $itemName = Str::limit('Donasi: ' . ($campaign?->title ?? 'Campaign'), 50, '');
+
+        $payload = [
+            'transaction_details' => [
+                'order_id' => $orderId,
+                'gross_amount' => $grossAmount,
+            ],
+            'item_details' => [[
+                'id' => 'donation',
+                'price' => $itemPrice,
+                'quantity' => $qty,
+                'name' => $itemName,
+            ]],
+            'customer_details' => [
+                'first_name' => $donation->donor_name ?: 'Donatur',
+                'email' => $donation->donor_email ?: 'donatur@example.test',
+            ],
+            'callbacks' => [
+                'finish' => route('donation.thanks', ['reference' => $donation->reference]),
+            ],
+            'credit_card' => [
+                'secure' => true,
+            ],
+        ];
+
+        $response = Http::withBasicAuth($this->serverKey(), '')
+            ->withHeaders([
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+            ])
+            ->post($this->snapApiBase() . '/transactions', $payload);
+
+        if (! $response->successful()) {
+            throw new \RuntimeException('Gagal membuat transaksi Midtrans: ' . $response->body());
+        }
+
+        $data = $response->json();
+        // data: token, redirect_url
+        return [
+            'token' => $data['token'] ?? null,
+            'redirect_url' => $data['redirect_url'] ?? null,
+            'order_id' => $orderId,
+            'gross_amount' => $grossAmount,
+            'request' => $payload,
+            'response' => $data,
+        ];
+    }
+
+    public function validateNotificationSignature(array $payload): bool
+    {
+        // signature_key = sha512(order_id + status_code + gross_amount + server_key)
+        $orderId = (string) ($payload['order_id'] ?? '');
+        $statusCode = (string) ($payload['status_code'] ?? '');
+        $grossAmount = (string) ($payload['gross_amount'] ?? '');
+        $signature = (string) ($payload['signature_key'] ?? '');
+        $serverKey = $this->serverKey();
+
+        $expected = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+        return hash_equals($expected, $signature);
+    }
+
+    public function mapTransactionStatusToDonation(array $payload): array
+    {
+        // Map Midtrans transaction_status to donation status
+        $status = $payload['transaction_status'] ?? null;
+        $fraud = $payload['fraud_status'] ?? null;
+
+        $donationStatus = 'initiated';
+        $paidAt = null;
+
+        if ($status === 'capture') {
+            $donationStatus = $fraud === 'accept' ? 'paid' : 'initiated';
+            if ($donationStatus === 'paid') {
+                $paidAt = now();
+            }
+        } elseif ($status === 'settlement') {
+            $donationStatus = 'paid';
+            $paidAt = now();
+        } elseif (in_array($status, ['deny', 'cancel', 'expire'])) {
+            $donationStatus = 'failed';
+        } elseif ($status === 'pending') {
+            $donationStatus = 'initiated';
+        }
+
+        return [
+            'status' => $donationStatus,
+            'paid_at' => $paidAt,
+        ];
+    }
+}

@@ -42,7 +42,7 @@ class CampaignArticleResource extends Resource
                         Forms\Components\Select::make('payout_id')
                             ->label('Terkait Payout')
                             ->options(fn () => Payout::query()->with('wallet.owner')->get()->mapWithKeys(fn ($p) => [
-                                $p->id => 'Payout #' . $p->id . ' - ' . (optional(optional($p->wallet->owner)->title) ?? 'Wallet') . ' - Rp ' . number_format((float)$p->amount, 2, ',', '.'),
+                                $p->id => 'Payout #' . $p->id . ' - ' . (optional($p->wallet->owner)->title ?? 'Wallet') . ' - Rp ' . number_format((float)$p->amount, 2, ',', '.'),
                             ]))
                             ->searchable()
                             ->preload()

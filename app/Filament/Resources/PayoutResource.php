@@ -84,7 +84,7 @@ class PayoutResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('wallet.owner.title')->label('Campaign')
-                    ->getStateUsing(fn ($record) => optional(optional($record->wallet->owner)->title)),
+                    ->getStateUsing(fn ($record) => optional($record->wallet->owner)->title),
                 Tables\Columns\TextColumn::make('amount')->formatStateUsing(fn ($state) => 'Rp ' . number_format((float)$state, 2, ',', '.')),
                 Tables\Columns\BadgeColumn::make('status')
                     ->colors([
