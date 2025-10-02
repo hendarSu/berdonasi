@@ -1,0 +1,36 @@
+@foreach ($campaigns as $c)
+    @php
+        $cover = optional($c->media->sortBy('sort_order')->first())->url;
+        $progress = (float) $c->target_amount > 0 ? min(100, round(((float) $c->raised_amount / (float) $c->target_amount) * 100)) : 0;
+    @endphp
+    <article class="overflow-hidden rounded-md border border-gray-200 bg-white shadow">
+        @if ($cover)
+            <img src="{{ $cover }}" alt="{{ $c->title }}" class="w-full object-cover" />
+        @else
+            <div class="flex h-44 w-full items-center justify-center bg-gray-100 text-gray-400">Tidak ada gambar</div>
+        @endif
+        <div class="space-y-3 p-4">
+            <h2 class="line-clamp-2 text-lg font-semibold">{{ $c->title }}</h2>
+            @if ($c->summary)
+                <p class="line-clamp-3 text-sm text-gray-600">{{ $c->summary }}</p>
+            @endif
+            <div class="space-y-1">
+                <div class="h-2 w-full overflow-hidden rounded-full bg-gray-200">
+                    <div class="h-full bg-sky-500" style="width: {{ $progress }}%"></div>
+                </div>
+                <div class="flex items-center justify-between text-xs text-gray-600">
+                    <span>Terkumpul: Rp {{ number_format((float) $c->raised_amount, 2, ',', '.') }}</span>
+                    <span>Target: Rp {{ number_format((float) $c->target_amount, 2, ',', '.') }}</span>
+                </div>
+            </div>
+            <div class="flex items-center justify-between pt-2">
+                <div class="flex flex-wrap gap-2">
+                    @foreach ($c->categories as $cat)
+                        <a href="{{ route('home', ['category' => $cat->slug]) }}" class="rounded-full bg-sky-50 px-2 py-1 text-xs text-sky-700 ring-1 ring-sky-200 hover:bg-sky-100">#{{ $cat->name }}</a>
+                    @endforeach
+                </div>
+                <a href="{{ route('campaign.show', $c->slug) }}" class="inline-flex items-center rounded-full bg-orange-500 px-3 py-2 text-xs font-semibold text-white shadow hover:bg-orange-600">DONASI SEKARANG</a>
+            </div>
+        </div>
+    </article>
+@endforeach
