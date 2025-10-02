@@ -45,4 +45,9 @@ class Organization extends Model
             return \Illuminate\Support\Facades\Storage::disk('s3')->url($this->logo_path);
         }
     }
+
+    public function wallet()
+    {
+        return $this->morphOne(\App\Models\Wallet::class, 'owner');
+    }
 }

@@ -11,7 +11,7 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets;
+use App\Filament\Widgets;
 use Filament\Navigation\NavigationGroup;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -46,8 +46,9 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                Widgets\FinancialStatsOverview::class,
+                Widgets\DonationsTrendChart::class,
+                Widgets\RecentPaymentsTable::class,
             ])
             // Define nicer grouped navigation and a quick website link
             ->navigationGroups([

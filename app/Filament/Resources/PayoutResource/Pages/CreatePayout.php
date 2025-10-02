@@ -18,41 +18,19 @@ class CreatePayout extends CreateRecord
     {
         $data['created_by'] = Auth::id();
         $data['status'] = $data['status'] ?? 'pending';
+        $data['requested_at'] = now();
+        // move optional source campaign info into meta_json
+        $meta = $data['meta_json'] ?? [];
+        if (!is_array($meta)) { $meta = []; }
+        if (!empty($data['source_campaign_id'] ?? null)) {
+            $cid = (int) $data['source_campaign_id'];
+            $camp = \App\Models\Campaign::find($cid);
+            $meta['source_campaign_id'] = $cid;
+            if ($camp) { $meta['source_campaign_title'] = $camp->title; }
+        }
+        $data['meta_json'] = $meta;
+        unset($data['source_campaign_id']);
         return $data;
     }
-
-    protected function afterCreate(): void
-    {
-        /** @var Payout $payout */
-        $payout = $this->record;
-
-        DB::transaction(function () use ($payout) {
-            $wallet = Wallet::lockForUpdate()->findOrFail($payout->wallet_id);
-
-            $items = $payout->items()->get();
-            $total = $items->sum('amount');
-
-            // Update payout total in case it changed
-            $payout->amount = $total;
-            $payout->save();
-
-            foreach ($items as $item) {
-                $newBalance = (float) $wallet->balance - (float) $item->amount;
-                LedgerEntry::create([
-                    'wallet_id' => $wallet->id,
-                    'type' => 'debit',
-                    'amount' => $item->amount,
-                    'source_type' => $payout->getMorphClass(),
-                    'source_id' => $payout->id,
-                    'memo' => $item->memo,
-                    'balance_after' => $newBalance,
-                    'created_at' => now(),
-                ]);
-                $wallet->balance = $newBalance;
-            }
-
-            $wallet->save();
-        });
-    }
+    // Payout debiting moved to approval/completion actions on the list page
 }
-

@@ -113,13 +113,18 @@
                                         <li class="mb-8 ml-6">
                                             <span class="absolute -left-3 mt-1 h-6 w-6 rounded-full bg-sky-100 text-sky-600 ring-2 ring-white"> </span>
                                             <div class="mb-1 text-xs text-gray-500">{{ optional($a->published_at)->format('d M Y') ?? '—' }}</div>
-                                            <h3 class="mb-2 text-base font-semibold">{{ $a->title }}</h3>
+                                            <h3 class="mb-2 text-base font-semibold">
+                                                <a class="text-sky-700 hover:underline" href="{{ route('article.show', ['id' => $a->id, 'slug' => \Illuminate\Support\Str::slug($a->title)]) }}">{{ $a->title }}</a>
+                                            </h3>
                                             @if ($a->payout?->amount)
                                                 <div class="mb-2 inline-block rounded-full bg-orange-50 px-2 py-1 text-xs text-orange-700 ring-1 ring-orange-200">Anggaran: Rp {{ number_format((float)$a->payout->amount, 2, ',', '.') }}</div>
                                             @endif
                                             @if ($a->body_md)
-                                                <div class="prose max-w-none">
-                                                    {!! nl2br(e($a->body_md)) !!}
+                                                <div class="prose max-w-none text-gray-700">
+                                                    {!! nl2br(e(\Illuminate\Support\Str::limit($a->body_md, 280))) !!}
+                                                </div>
+                                                <div class="mt-2">
+                                                    <a class="text-sm text-sky-600 hover:underline" href="{{ route('article.show', ['id' => $a->id, 'slug' => \Illuminate\Support\Str::slug($a->title)]) }}">Baca selengkapnya →</a>
                                                 </div>
                                             @endif
                                         </li>

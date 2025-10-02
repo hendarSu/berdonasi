@@ -32,7 +32,7 @@ class LedgerEntryResource extends Resource
                     ->label('Owner Type')
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('wallet.owner.title')
-                    ->label('Organisasi')
+                    ->label('Sumber Dana (Owner)')
                     ->getStateUsing(function ($record) {
                         $owner = optional($record->wallet)->owner;
                         return $owner->title ?? $owner->name ?? null;
