@@ -6,7 +6,11 @@
     @php
         $metaTitle = $c->meta_title ?: $c->title;
         $metaDesc = $c->meta_description ?: ($c->summary ?: '');
-        $metaImage = $c->meta_image_url ?: optional($c->media->sortBy('sort_order')->first())->url;
+        $mSorted = $c->media->sortBy('sort_order');
+        $mDesktop = optional($mSorted->firstWhere('platform', 'desktop'))->url;
+        $mMobile = optional($mSorted->firstWhere('platform', 'mobile'))->url;
+        $fallbackCover = optional($mSorted->first())->url;
+        $metaImage = $c->meta_image_url ?: ($mDesktop ?: ($mMobile ?: $fallbackCover));
         $metaUrl = route('campaign.show', $c->slug);
     @endphp
     <title>{{ $metaTitle }} — {{ env('APP_NAME') }}</title>
@@ -40,17 +44,27 @@
     </header>
 
     <main class="mx-auto max-w-7xl px-4 py-8">
-        @php $cover = optional($c->media->sortBy('sort_order')->first())->url; @endphp
+        @php
+            $mSorted = $c->media->sortBy('sort_order');
+            $coverDesktop = optional($mSorted->firstWhere('platform', 'desktop'))->url;
+            $coverMobile = optional($mSorted->firstWhere('platform', 'mobile'))->url;
+            $cover = $coverDesktop ?: ($coverMobile ?: optional($mSorted->first())->url);
+        @endphp
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div class="lg:col-span-2 space-y-4">
                 <h1 class="text-2xl font-bold leading-tight">{{ $c->title }}</h1>
                 @if ($cover)
-                    <img src="{{ $cover }}" alt="{{ $c->title }}" class="aspect-[16/9] w-full rounded-xl object-cover shadow" />
+                    <picture>
+                        @if ($coverMobile)
+                            <source media="(max-width: 768px)" srcset="{{ $coverMobile }}">
+                        @endif
+                        <img src="{{ $cover }}" alt="{{ $c->title }}" class="rounded-md w-full object-cover shadow mb-5" />
+                    </picture>
                 @endif
 
                 <!-- Tabs -->
                 @php $activeTab = $tab ?? 'detail'; @endphp
-                <div class="rounded-xl bg-white shadow">
+                <div class="rounded-md bg-white shadow">
                     <div class="border-b border-gray-200">
                         <nav class="flex overflow-x-auto" aria-label="Tabs">
                             @php
@@ -85,7 +99,7 @@
                             @endif
                             @if ($c->media->count() > 1)
                                 <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                                    @foreach ($c->media->skip(1) as $m)
+                                    @foreach ($mSorted->values()->skip(1) as $m)
                                         <img src="{{ $m->url }}" class="aspect-video w-full rounded-lg object-cover" alt="media" />
                                     @endforeach
                                 </div>
@@ -146,7 +160,7 @@
 
             <aside class="lg:col-span-1">
                 <div class="sticky top-4 space-y-4">
-                    <div class="rounded-xl bg-white p-5 shadow">
+                    <div class="rounded-md bg-white p-5 shadow">
                         @php
                             $progress = (float)$c->target_amount > 0 ? min(100, round(((float)$c->raised_amount / (float)$c->target_amount) * 100)) : 0;
                         @endphp

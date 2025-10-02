@@ -15,6 +15,7 @@ class CampaignMedia extends Model
     protected $fillable = [
         'campaign_id',
         'type',
+        'platform',
         'path',
         'sort_order',
         'meta_json',

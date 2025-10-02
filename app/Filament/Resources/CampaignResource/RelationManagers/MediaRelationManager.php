@@ -26,6 +26,15 @@ class MediaRelationManager extends RelationManager
                             ->default('image')
                             ->readOnly()
                             ->dehydrated(),
+                        Forms\Components\Select::make('platform')
+                            ->label('Platform')
+                            ->options([
+                                'desktop' => 'Desktop',
+                                'mobile' => 'Mobile',
+                            ])
+                            ->default('desktop')
+                            ->native(false)
+                            ->required(),
                         Forms\Components\FileUpload::make('path')
                             ->label('Gambar')
                             ->image()
@@ -63,6 +72,12 @@ class MediaRelationManager extends RelationManager
                     ->label('Preview')
                     ->getStateUsing(fn ($record) => $record->url)
                     ->square(),
+                Tables\Columns\TextColumn::make('platform')
+                    ->badge()
+                    ->colors([
+                        'info' => 'desktop',
+                        'warning' => 'mobile',
+                    ]),
                 Tables\Columns\TextColumn::make('type')->badge()->color('info'),
                 Tables\Columns\TextColumn::make('sort_order')->sortable(),
                 Tables\Columns\TextColumn::make('created_at')->dateTime(),
