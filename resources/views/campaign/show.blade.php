@@ -59,6 +59,12 @@
         </script>
         <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id={{ $fbPixelId }}&ev=PageView&noscript=1"/></noscript>
     @endif
+    <style>
+        /* Custom padding wrapper as requested */
+        @media (min-width: 1024px) { /* lg */
+            .content-wrap { padding-top: 20px; padding-bottom: 20px; }
+        }
+    </style>
 </head>
 <body class="bg-gray-50 text-gray-900">
     @if (!empty($gtmId))
@@ -70,7 +76,8 @@
         </div>
     </header>
 
-    <main class="mx-auto max-w-7xl px-4 py-8">
+    <main class="mx-auto max-w-7xl mb-4">
+        <div class="content-wrap">
         @php
             $mSorted = $c->media->sortBy('sort_order');
             $coverDesktop = optional($mSorted->firstWhere('platform', 'desktop'))->url;
@@ -79,9 +86,8 @@
         @endphp
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div class="lg:col-span-2 space-y-4">
-                <h1 class="text-2xl font-bold leading-tight">{{ $c->title }}</h1>
                 @if ($cover)
-                <div class="rounded-md w-full overflow-hidden">
+                <div class="w-full overflow-hidden">
                     <picture>
                         @if ($coverMobile)
                             <source media="(max-width: 768px)" srcset="{{ $coverMobile }}">
@@ -93,6 +99,8 @@
                             $progress = (float)$c->target_amount > 0 ? min(100, round(((float)$c->raised_amount / (float)$c->target_amount) * 100)) : 0;
                         @endphp
                         <div class="mb-3 space-y-2">
+                                <h1 class="text-2xl font-bold leading-tight">{{ $c->title }}</h1>
+
                             <div class="h-2 w-full overflow-hidden rounded-full bg-gray-200">
                                 <div class="h-full bg-sky-500" style="width: {{ $progress }}%"></div>
                             </div>
@@ -102,7 +110,7 @@
                             </div>
                         </div>
 
-                        <h2 class="mb-1 text-lg font-semibold">Dukung Campaign Ini</h2>
+                        <h2 class="mb-1 text-lg font-semibold">Dukung Program Ini</h2>
                         <p class="text-sm text-gray-600">Klik tombol Donasi untuk melanjutkan ke halaman donasi.</p>
 
                             <div class="mt-2 space-y-3">
@@ -116,7 +124,7 @@
 
                 <!-- Tabs -->
                 @php $activeTab = $tab ?? 'detail'; @endphp
-                <div class="rounded-md bg-white shadow mb-5" style="margin-bottom: 50px !important;">
+                <div class="bg-white shadow mb-5" style="margin-bottom: 50px !important;margin-top: -15px;">
                     <div class="border-b border-gray-200">
                         <nav class="flex overflow-x-auto" aria-label="Tabs">
                             @php
@@ -223,12 +231,12 @@
                 </div>
             </div>
 
-            <!-- Desktop-only Aside: Related Campaigns -->
+            <!-- Desktop-only Aside: Related Programs -->
             <aside class="hidden lg:block">
                 @if (($related ?? collect())->isNotEmpty())
                     <div class="sticky top-4 space-y-4">
                         <div class="rounded-md bg-white p-5 shadow">
-                            <h2 class="mb-3 text-lg font-semibold">Campaign Lainnya</h2>
+                            <h2 class="mb-3 text-lg font-semibold">Program Lainnya</h2>
                             <div class="space-y-4">
                                 @foreach ($related as $r)
                                     @php
@@ -263,6 +271,7 @@
                     </div>
                 @endif
             </aside>
+        </div>
         </div>
     </main>
     @php
