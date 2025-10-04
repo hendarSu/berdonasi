@@ -57,26 +57,22 @@
                             <img src="{{ $org->logo_url }}" alt="{{ $org->name }}" class="h-8 w-auto" />
                         @else
                             <div class="flex items-center justify-center w-10 h-10 bg-indigo-600 rounded-lg">
-                                <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none"
-                                     xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M7 8L3 11.6923L7 16M17 8L21 11.6923L17 16M14 4L10 20" stroke="currentColor"
-                                          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M7 8L3 11.6923L7 16M17 8L21 11.6923L17 16M14 4L10 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
                             </div>
                         @endif
                     </a>
 
                     <!-- Desktop Navigation -->
-                    <nav class="hidden md:flex items-center gap-1">
+                    <nav class="hidden lg:flex items-center gap-1">
                         @php
                             $tabBase = 'px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors';
                             $tabActive = 'px-4 py-2 text-sm font-semibold text-gray-900 bg-gray-50 rounded-lg';
                         @endphp
-
                         <a href="{{ route('news.index') }}" class="{{ request()->routeIs('news.index') ? $tabActive : $tabBase }}">
                             Berita
                         </a>
-
                     </nav>
                 </div>
 
@@ -85,31 +81,30 @@
                     <!-- Desktop Search -->
                     <form method="get" action="{{ route('home') }}" class="hidden sm:block">
                         <div class="relative">
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                 class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
-                                 viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd"
-                                      d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                                      clip-rule="evenodd" />
-                            </svg>
-                            <input type="text" name="q" value="{{ $q ?? '' }}" placeholder="Search"
-                                   class="w-64 lg:w-80 rounded-lg border border-gray-300 bg-white pl-10 pr-4 py-2 text-sm text-gray-900 placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-colors" />
+                            <input
+                                type="text"
+                                name="q"
+                                value="{{ $q ?? '' }}"
+                                placeholder="Cari Program"
+                                class="w-64 lg:w-80 rounded-lg border border-gray-300 bg-white pl-10 pr-4 py-2 text-sm text-gray-900 placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-colors"
+                                style="padding-left: 10%"
+                            />
                         </div>
                     </form>
 
                     <!-- Mobile Menu Button -->
-                    <button id="mobile-nav-toggle" type="button"
-                            class="inline-flex items-center justify-center rounded-lg p-2 text-gray-600 hover:bg-gray-100 hover:text-gray-900 md:hidden transition-colors"
-                            aria-label="Toggle menu" aria-expanded="false">
-                        <svg id="menu-icon" class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none"
-                             viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M4 6h16M4 12h16M4 18h16" />
+                    <button
+                        id="mobile-nav-toggle"
+                        type="button"
+                        class="inline-flex items-center justify-center rounded-lg p-2 text-gray-600 hover:bg-gray-100 hover:text-gray-900 lg:hidden transition-colors"
+                        aria-label="Toggle menu"
+                        aria-expanded="false"
+                    >
+                        <svg id="menu-icon" class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
-                        <svg id="close-icon" class="h-6 w-6 hidden" xmlns="http://www.w3.org/2000/svg" fill="none"
-                             viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M6 18L18 6M6 6l12 12" />
+                        <svg id="close-icon" class="h-6 w-6 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>
@@ -117,13 +112,13 @@
         </div>
 
         <!-- Mobile Navigation Menu -->
-        <div id="mobile-menu" class="hidden md:hidden border-t border-gray-200">
+        <div id="mobile-menu" class="hidden lg:hidden border-t border-gray-200">
             <div class="px-4 py-3 space-y-1">
                 @php
                     $mobileTabBase = 'block px-4 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors';
                     $mobileTabActive = 'block px-4 py-3 text-sm font-semibold text-gray-900 bg-gray-50 rounded-lg';
                 @endphp
-                <a href="{{ route('news.index') }}" class="{{ request()->routeIs('news.index') ? $tabActive : $tabBase }}">
+                <a href="{{ route('news.index') }}" class="{{ request()->routeIs('news.index') ? $mobileTabActive : $mobileTabBase }}">
                     Berita
                 </a>
             </div>
@@ -132,15 +127,15 @@
             <div class="px-4 pb-4 sm:hidden">
                 <form method="get" action="{{ route('home') }}">
                     <div class="relative">
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                             class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" viewBox="0 0 20 20"
-                             fill="currentColor">
-                            <path fill-rule="evenodd"
-                                  d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                                  clip-rule="evenodd" />
-                        </svg>
-                        <input type="text" name="q" value="{{ $q ?? '' }}" placeholder="Search"
-                               class="w-full rounded-lg border border-gray-300 bg-white pl-10 pr-4 py-2 text-sm text-gray-900 placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+
+                        <input
+                            type="text"
+                            name="q"
+                            value="{{ $q ?? '' }}"
+                            placeholder="Cari Program"
+                            class="w-full rounded-lg border border-gray-300 bg-white pl-10 pr-4 py-2 text-sm text-gray-900 placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 mb-2"
+                            style="padding-left: 5%"
+                        />
                     </div>
                 </form>
             </div>
@@ -241,13 +236,13 @@
         </section>
 
         @if ($campaigns->count() === 0)
-            <div class="rounded-md border border-gray-200 bg-white p-6 text-center text-gray-600">Belum ada kampanye.</div>
+            <div class="rounded-md border border-gray-200 bg-white p-6 text-center text-gray-600 mb-5">Belum ada kampanye.</div>
         @else
-            <div id="campaign-grid" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div id="campaign-grid" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-5">
                 @include('partials.campaign-cards', ['campaigns' => $campaigns])
             </div>
 
-            <div class="mt-8 flex justify-center mb-5">
+            <div class="mt-5 flex justify-center mb-5">
                 <button id="load-more-btn"
                         data-next-page="{{ $campaigns->hasMorePages() ? ($campaigns->currentPage() + 1) : '' }}"
                         data-has-more="{{ $campaigns->hasMorePages() ? '1' : '0' }}"
@@ -268,7 +263,7 @@
                            class="group block overflow-hidden rounded-md bg-white shadow hover:ring-1 hover:ring-sky-200">
                             <article>
                                 @if ($n->cover_url)
-                                    <img src="{{ $n->cover_url }}" alt="{{ $n->title }}" class="aspect-video w-full object-cover" />
+                                    <img src="{{ $n->cover_url }}" alt="{{ $n->title }}" class="w-full object-cover" />
                                 @endif
                                 <div class="p-4">
                                     <h3 class="line-clamp-2 text-base font-semibold text-gray-900 group-hover:text-sky-700">
@@ -464,28 +459,28 @@
     </script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const toggleButton = document.getElementById('mobile-nav-toggle');
-            const mobileMenu = document.getElementById('mobile-menu');
-            const menuIcon = document.getElementById('menu-icon');
-            const closeIcon = document.getElementById('close-icon');
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleButton = document.getElementById('mobile-nav-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+        const closeIcon = document.getElementById('close-icon');
 
-            toggleButton.addEventListener('click', function () {
-                const isExpanded = mobileMenu.classList.contains('hidden');
+        toggleButton.addEventListener('click', function() {
+            const isExpanded = mobileMenu.classList.contains('hidden');
 
-                if (isExpanded) {
-                    mobileMenu.classList.remove('hidden');
-                    menuIcon.classList.add('hidden');
-                    closeIcon.classList.remove('hidden');
-                    toggleButton.setAttribute('aria-expanded', 'true');
-                } else {
-                    mobileMenu.classList.add('hidden');
-                    menuIcon.classList.remove('hidden');
-                    closeIcon.classList.add('hidden');
-                    toggleButton.setAttribute('aria-expanded', 'false');
-                }
-            });
+            if (isExpanded) {
+                mobileMenu.classList.remove('hidden');
+                menuIcon.classList.add('hidden');
+                closeIcon.classList.remove('hidden');
+                toggleButton.setAttribute('aria-expanded', 'true');
+            } else {
+                mobileMenu.classList.add('hidden');
+                menuIcon.classList.remove('hidden');
+                closeIcon.classList.add('hidden');
+                toggleButton.setAttribute('aria-expanded', 'false');
+            }
         });
+    });
     </script>
 </body>
 
