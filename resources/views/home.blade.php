@@ -70,6 +70,7 @@
                             $tabBase = 'px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors';
                             $tabActive = 'px-4 py-2 text-sm font-semibold text-gray-900 bg-gray-50 rounded-lg';
                         @endphp
+                        <a href="{{ route('program.index') }}" class="{{ (request()->routeIs('program.*') || request()->routeIs('home')) ? $tabActive : $tabBase }}">Program</a>
                         <a href="{{ route('news.index') }}" class="{{ request()->routeIs('news.index') ? $tabActive : $tabBase }}">
                             Berita
                         </a>
@@ -158,8 +159,8 @@
                 </button>
             </div>
             <nav class="px-4 py-3">
-                <a href="{{ route('home') }}"
-                   class="block rounded-md px-3 py-2 text-sm {{ request()->routeIs('home') ? 'bg-sky-50 text-sky-700' : 'text-gray-700 hover:bg-gray-50' }}">Program</a>
+                <a href="{{ route('program.index') }}"
+                   class="block rounded-md px-3 py-2 text-sm {{ (request()->routeIs('program.*') || request()->routeIs('home')) ? 'bg-sky-50 text-sky-700' : 'text-gray-700 hover:bg-gray-50' }}">Program</a>
                 <a href="{{ route('news.index') }}"
                    class="mt-1 block rounded-md px-3 py-2 text-sm {{ request()->routeIs('news.*') ? 'bg-sky-50 text-sky-700' : 'text-gray-700 hover:bg-gray-50' }}">Berita</a>
             </nav>

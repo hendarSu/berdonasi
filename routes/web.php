@@ -7,9 +7,12 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\DonorController;
 use App\Http\Controllers\CampaignArticleController;
 use App\Http\Controllers\MediaProxyController;
+use App\Http\Controllers\ProgramController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/campaigns/chunk', [HomeController::class, 'chunk'])->name('home.chunk');
+Route::get('/program', [ProgramController::class, 'index'])->name('program.index');
+Route::get('/programs/chunk', [ProgramController::class, 'chunk'])->name('program.chunk');
 
 Route::get('/campaign/{slug}', [CampaignController::class, 'show'])->name('campaign.show');
 Route::get('/campaign/{slug}/donasi', [CampaignController::class, 'donateForm'])->name('campaign.donate.form');
