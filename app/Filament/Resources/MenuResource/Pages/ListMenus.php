@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\NewsResource\Pages;
+namespace App\Filament\Resources\MenuResource\Pages;
 
-use App\Filament\Resources\NewsResource;
+use App\Filament\Resources\MenuResource;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Actions;
 
-class ListNews extends ListRecords
+class ListMenus extends ListRecords
 {
-    protected static string $resource = NewsResource::class;
+    protected static string $resource = MenuResource::class;
 
     protected function getHeaderActions(): array
     {

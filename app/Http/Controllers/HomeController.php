@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Campaign;
 use App\Models\Category;
 use App\Models\Organization;
+use App\Models\News;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -47,6 +48,14 @@ class HomeController extends Controller
             ->orderBy('name')
             ->get(['id', 'name', 'slug']);
 
+        // Latest published news for homepage (3 items)
+        $latestNews = News::query()
+            ->where('status', 'published')
+            ->whereNotNull('published_at')
+            ->orderByDesc('published_at')
+            ->take(3)
+            ->get(['id','title','slug','excerpt','cover_path','published_at','author_id']);
+
         return view('home', [
             'campaigns' => $campaigns,
             'categories' => $categories,
@@ -55,6 +64,7 @@ class HomeController extends Controller
             'perPage' => $perPage,
             'org' => $org,
             'heroes' => $heroes,
+            'latestNews' => $latestNews,
         ]);
     }
 

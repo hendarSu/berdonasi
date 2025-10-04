@@ -31,6 +31,15 @@ class PageResource extends Resource
                     ->fileAttachmentsDisk('s3')->fileAttachmentsDirectory('pages')->fileAttachmentsVisibility('private')
                     ->toolbarButtons(['bold','italic','underline','strike','link','blockquote','h2','h3','bulletList','orderedList','attachment','undo','redo']),
                 Forms\Components\DateTimePicker::make('published_at')->label('Terbit')->seconds(false),
+                Forms\Components\Select::make('status')
+                    ->label('Status')
+                    ->options([
+                        'draft' => 'Draft',
+                        'published' => 'Published',
+                        'archived' => 'Archived',
+                    ])
+                    ->default('draft')
+                    ->native(false),
             ]),
             Forms\Components\Section::make('SEO')->columns(2)->schema([
                 Forms\Components\TextInput::make('meta_title')->maxLength(255),
@@ -46,6 +55,15 @@ class PageResource extends Resource
             Tables\Columns\TextColumn::make('title')->label('Judul')->searchable()->sortable(),
             Tables\Columns\TextColumn::make('slug')->searchable(),
             Tables\Columns\TextColumn::make('published_at')->dateTime()->label('Terbit'),
+            Tables\Columns\TextColumn::make('status')
+                ->badge()
+                ->colors([
+                    'gray' => 'draft',
+                    'success' => 'published',
+                    'warning' => 'archived',
+                ])
+                ->label('Status')
+                ->sortable(),
             Tables\Columns\TextColumn::make('updated_at')->dateTime()->toggleable(isToggledHiddenByDefault: true),
         ])->defaultSort('updated_at','desc')->actions([
             Tables\Actions\EditAction::make(),
@@ -65,4 +83,3 @@ class PageResource extends Resource
         ];
     }
 }
-

@@ -22,3 +22,11 @@ Route::view('/donasi/{reference}/terima-kasih', 'donation.thanks')->name('donati
 // Pembayaran (Midtrans)
 Route::get('/donasi/{reference}/bayar', [PaymentController::class, 'pay'])->name('donation.pay');
 Route::post('/midtrans/notify', [PaymentController::class, 'notify'])->name('midtrans.notify');
+
+// Donor CRM (public simple listing)
+Route::get('/donatur', [DonorController::class, 'index'])->name('donor.index');
+
+// News (storefront)
+use App\Http\Controllers\NewsController;
+Route::get('/berita', [NewsController::class, 'index'])->name('news.index');
+Route::get('/berita/{slug}', [NewsController::class, 'show'])->name('news.show');

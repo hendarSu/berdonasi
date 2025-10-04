@@ -14,7 +14,7 @@ class News extends Model
 
     protected $fillable = [
         'title', 'slug', 'excerpt', 'body_md', 'cover_path', 'author_id',
-        'published_at', 'meta_title', 'meta_description', 'meta_image_url',
+        'published_at', 'status', 'meta_title', 'meta_description', 'meta_image_url',
     ];
 
     protected $casts = [
@@ -37,4 +37,3 @@ class News extends Model
         }
     }
 }
-

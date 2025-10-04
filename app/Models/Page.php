@@ -10,11 +10,10 @@ class Page extends Model
     use HasFactory;
 
     protected $fillable = [
-        'title', 'slug', 'body_md', 'published_at', 'meta_title', 'meta_description', 'meta_image_url',
+        'title', 'slug', 'body_md', 'published_at', 'status', 'meta_title', 'meta_description', 'meta_image_url',
     ];
 
     protected $casts = [
         'published_at' => 'datetime',
     ];
 }
-

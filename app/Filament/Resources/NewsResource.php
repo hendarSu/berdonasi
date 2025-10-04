@@ -10,6 +10,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class NewsResource extends Resource
 {
@@ -28,6 +29,22 @@ class NewsResource extends Resource
                     ->afterStateUpdated(function ($state, $set) { if ($state) $set('slug', Str::slug($state)); }),
                 Forms\Components\TextInput::make('slug')->required()->unique(ignoreRecord: true),
                 Forms\Components\TextInput::make('excerpt')->label('Ringkasan')->maxLength(255)->columnSpanFull(),
+                Forms\Components\Select::make('author_id')
+                    ->label('Penulis')
+                    ->relationship('author', 'name')
+                    ->default(fn () => Auth::id())
+                    ->searchable()
+                    ->preload()
+                    ->native(false),
+                Forms\Components\Select::make('status')
+                    ->label('Status')
+                    ->options([
+                        'draft' => 'Draft',
+                        'published' => 'Published',
+                        'archived' => 'Archived',
+                    ])
+                    ->default('draft')
+                    ->native(false),
                 Forms\Components\FileUpload::make('cover_path')->label('Cover')->image()->disk('s3')->directory('news/covers')->visibility('private')->imageEditor()->imagePreviewHeight('180'),
                 Forms\Components\RichEditor::make('body_md')->label('Isi')->columnSpanFull()
                     ->fileAttachmentsDisk('s3')->fileAttachmentsDirectory('news')->fileAttachmentsVisibility('private')
@@ -48,7 +65,16 @@ class NewsResource extends Resource
             Tables\Columns\TextColumn::make('title')->label('Judul')->searchable()->sortable(),
             Tables\Columns\TextColumn::make('slug')->toggleable(isToggledHiddenByDefault: true),
             Tables\Columns\TextColumn::make('published_at')->dateTime()->label('Terbit')->sortable(),
-            Tables\Columns\TextColumn::make('author_id')->label('Penulis')->getStateUsing(fn ($r) => optional($r->author)->name)->toggleable(isToggledHiddenByDefault: true),
+            Tables\Columns\TextColumn::make('status')
+                ->badge()
+                ->colors([
+                    'gray' => 'draft',
+                    'success' => 'published',
+                    'warning' => 'archived',
+                ])
+                ->label('Status')
+                ->sortable(),
+            Tables\Columns\TextColumn::make('author.name')->label('Penulis')->toggleable(isToggledHiddenByDefault: true),
             Tables\Columns\TextColumn::make('updated_at')->dateTime()->toggleable(isToggledHiddenByDefault: true),
         ])->defaultSort('published_at','desc')->actions([
             Tables\Actions\EditAction::make(),
@@ -68,4 +94,3 @@ class NewsResource extends Resource
         ];
     }
 }
-
