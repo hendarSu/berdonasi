@@ -21,9 +21,12 @@
             @if ($a->payout?->amount)
                 <div class="inline-block rounded-full bg-orange-50 px-2 py-1 text-xs text-orange-700 ring-1 ring-orange-200">Anggaran: Rp {{ number_format((float)$a->payout->amount, 2, ',', '.') }}</div>
             @endif
+            @if ($a->cover_url)
+                <img src="{{ $a->cover_url }}" alt="Cover" class="w-full rounded-md object-cover" />
+            @endif
             @if ($a->body_md)
                 <div class="prose max-w-none bg-white p-4 rounded-md shadow">
-                    {!! nl2br(e($a->body_md)) !!}
+                    {!! $a->body_md !!}
                 </div>
             @endif
         </article>
@@ -84,4 +87,3 @@
     </script>
 </body>
 </html>
-

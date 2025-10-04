@@ -13,7 +13,7 @@ class CampaignController extends Controller
     public function show(Request $request, string $slug)
     {
         $campaign = Campaign::query()
-            ->with(['categories:id,name,slug', 'media' => fn ($q) => $q->orderBy('sort_order')])
+            ->with(['organization:id,name,meta_json', 'categories:id,name,slug', 'media' => fn ($q) => $q->orderBy('sort_order')])
             ->where('slug', $slug)
             ->firstOrFail();
 

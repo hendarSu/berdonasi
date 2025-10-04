@@ -49,7 +49,25 @@ class CampaignArticleResource extends Resource
                             ->native(false)
                             ->hint('Opsional'),
                         Forms\Components\DateTimePicker::make('published_at')->label('Terbit')->seconds(false),
-                        Forms\Components\MarkdownEditor::make('body_md')->label('Isi')->columnSpanFull(),
+                        Forms\Components\FileUpload::make('cover_path')
+                            ->label('Cover Image')
+                            ->image()
+                            ->disk('s3')
+                            ->directory('articles/covers')
+                            ->visibility('private')
+                            ->imageEditor()
+                            ->imageResizeMode('cover')
+                            ->imagePreviewHeight('200')
+                            ->columnSpanFull(),
+                        Forms\Components\RichEditor::make('body_md')
+                            ->label('Isi')
+                            ->columnSpanFull()
+                            ->fileAttachmentsDisk('s3')
+                            ->fileAttachmentsDirectory('articles')
+                            ->fileAttachmentsVisibility('private')
+                            ->toolbarButtons([
+                                'bold', 'italic', 'strike', 'underline', 'link', 'blockquote', 'codeBlock', 'h2', 'h3', 'bulletList', 'orderedList', 'attachment', 'undo', 'redo'
+                            ]),
                     ]),
             ]);
     }

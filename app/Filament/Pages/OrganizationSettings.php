@@ -16,6 +16,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
+use Filament\Notifications\Notification;
 
 class OrganizationSettings extends Page implements HasForms
 {
@@ -62,6 +63,10 @@ class OrganizationSettings extends Page implements HasForms
                     'client_key' => $this->org->meta_json['payments']['midtrans']['client_key'] ?? null,
                     'merchant_id' => $this->org->meta_json['payments']['midtrans']['merchant_id'] ?? null,
                 ],
+            ],
+            'analytics' => [
+                'facebook_pixel_id' => $this->org->meta_json['analytics']['facebook_pixel_id'] ?? null,
+                'gtm_id' => $this->org->meta_json['analytics']['gtm_id'] ?? null,
             ],
             'social' => $this->org?->social_json ?? [
                 'website' => null,
@@ -174,6 +179,17 @@ class OrganizationSettings extends Page implements HasForms
                             ->columnSpanFull(),
                     ]),
 
+                Section::make('Analytics')
+                    ->columns(2)
+                    ->schema([
+                        Fieldset::make('Tracking')
+                            ->columns(2)
+                            ->schema([
+                                TextInput::make('analytics.facebook_pixel_id')->label('Facebook Pixel ID')->placeholder('e.g. 1234567890'),
+                                TextInput::make('analytics.gtm_id')->label('Google Tag Manager ID')->placeholder('e.g. GTM-XXXXXXX'),
+                            ])->columnSpanFull(),
+                    ]),
+
                 Section::make('Homepage')
                     ->columns(2)
                     ->schema([
@@ -238,6 +254,14 @@ class OrganizationSettings extends Page implements HasForms
                 'merchant_id' => $mt['merchant_id'] ?? null,
             ]);
         }
+        // Analytics
+        if (isset($state['analytics']) && is_array($state['analytics'])) {
+            $an = $state['analytics'];
+            $meta['analytics'] = array_merge($meta['analytics'] ?? [], [
+                'facebook_pixel_id' => $an['facebook_pixel_id'] ?? null,
+                'gtm_id' => $an['gtm_id'] ?? null,
+            ]);
+        }
         if (isset($state['hero_campaign_ids']) && is_array($state['hero_campaign_ids'])) {
             $ids = array_values(array_filter($state['hero_campaign_ids']));
             if (!empty($ids)) {
@@ -261,9 +285,9 @@ class OrganizationSettings extends Page implements HasForms
 
         $this->org = $org;
 
-        $this->dispatch('notify',
-            status: 'success',
-            message: 'Pengaturan organisasi disimpan.'
-        );
+        Notification::make()
+            ->title('Pengaturan organisasi disimpan')
+            ->success()
+            ->send();
     }
 }

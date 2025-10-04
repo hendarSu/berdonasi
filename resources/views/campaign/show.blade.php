@@ -35,8 +35,35 @@
         <meta name="twitter:image" content="{{ $metaImage }}">
     @endif
     @vite(['resources/css/app.css','resources/js/app.js'])
+    @php
+        $orgAnalytics = $c->organization?->meta_json['analytics'] ?? [];
+        $fbPixelId = $orgAnalytics['facebook_pixel_id'] ?? null;
+        $gtmId = $orgAnalytics['gtm_id'] ?? null;
+    @endphp
+    @if (!empty($gtmId))
+        <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','{{ $gtmId }}');</script>
+    @endif
+    @if (!empty($fbPixelId))
+        <script>
+            !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+            n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+            t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', '{{ $fbPixelId }}');
+            fbq('track', 'PageView');
+        </script>
+        <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id={{ $fbPixelId }}&ev=PageView&noscript=1"/></noscript>
+    @endif
 </head>
 <body class="bg-gray-50 text-gray-900">
+    @if (!empty($gtmId))
+        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ $gtmId }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    @endif
     <header class="bg-white border-b border-gray-200">
         <div class="mx-auto max-w-7xl px-4 py-3 flex items-center gap-4">
             <a href="{{ route('home') }}" class="text-sky-600 hover:text-sky-700">← Kembali</a>
@@ -113,15 +140,18 @@
                                         <li class="mb-8 ml-6">
                                             <span class="absolute -left-3 mt-1 h-6 w-6 rounded-full bg-sky-100 text-sky-600 ring-2 ring-white"> </span>
                                             <div class="mb-1 text-xs text-gray-500">{{ optional($a->published_at)->format('d M Y') ?? '—' }}</div>
-                                            <h3 class="mb-2 text-base font-semibold">
+                                                <h3 class="mb-2 text-base font-semibold">
                                                 <a class="text-sky-700 hover:underline" href="{{ route('article.show', ['id' => $a->id, 'slug' => \Illuminate\Support\Str::slug($a->title)]) }}">{{ $a->title }}</a>
-                                            </h3>
+                                                </h3>
+                                                @if ($a->cover_url)
+                                                    <img src="{{ $a->cover_url }}" alt="Cover" class="mt-1 mb-2 w-full max-w-md rounded object-cover" />
+                                                @endif
                                             @if ($a->payout?->amount)
                                                 <div class="mb-2 inline-block rounded-full bg-orange-50 px-2 py-1 text-xs text-orange-700 ring-1 ring-orange-200">Anggaran: Rp {{ number_format((float)$a->payout->amount, 2, ',', '.') }}</div>
                                             @endif
                                             @if ($a->body_md)
                                                 <div class="prose max-w-none text-gray-700">
-                                                    {!! nl2br(e(\Illuminate\Support\Str::limit($a->body_md, 280))) !!}
+                                                    {{ \Illuminate\Support\Str::limit(strip_tags($a->body_md), 280) }}
                                                 </div>
                                                 <div class="mt-2">
                                                     <a class="text-sm text-sky-600 hover:underline" href="{{ route('article.show', ['id' => $a->id, 'slug' => \Illuminate\Support\Str::slug($a->title)]) }}">Baca selengkapnya →</a>
