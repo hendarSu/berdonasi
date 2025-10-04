@@ -48,8 +48,8 @@
     @endphp
     <div class="fixed inset-x-0 bottom-0 z-30 bg-white/95 backdrop-blur border-t border-gray-200">
         <div class="mx-auto max-w-7xl px-4 py-3 flex items-center gap-3">
-            <a href="{{ route('campaign.donate.form', $c->slug) }}" class="flex-1 inline-flex items-center justify-center rounded-md bg-orange-500 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-orange-600">Donasi</a>
             <button type="button" id="fab-share-trigger" class="inline-flex items-center justify-center rounded-md border border-orange-500 bg-white px-4 py-2.5 text-sm font-semibold text-orange-600 shadow-sm hover:bg-orange-50" aria-label="Bagikan">Bagikan</button>
+            <a href="{{ route('campaign.donate.form', $c->slug) }}" class="flex-1 inline-flex items-center justify-center rounded-md bg-orange-500 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-orange-600">Donasi</a>
             <div id="fab-share-popover" class="pointer-events-auto invisible absolute bottom-14 right-4 translate-y-2 opacity-0 transition-all duration-150 ease-out">
                 <div class="flex items-center gap-3 rounded-xl bg-white p-2 shadow-lg ring-1 ring-gray-200">
                     <a href="https://wa.me/?text={{ $encTextFab }}%20{{ $encUrlFab }}" target="_blank" rel="noopener" class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#25D366] text-white hover:opacity-90" aria-label="WhatsApp">
