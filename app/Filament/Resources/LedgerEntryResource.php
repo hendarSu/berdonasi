@@ -82,7 +82,8 @@ class LedgerEntryResource extends Resource
                     ]),
             ])
             ->actions([])
-            ->bulkActions([]);
+            ->bulkActions([])
+            ->defaultSort('created_at', 'desc');
     }
 
     public static function getPages(): array

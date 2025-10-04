@@ -193,26 +193,29 @@
                             @if ($donations->count() === 0)
                                 <p class="text-gray-600">Belum ada donatur.</p>
                             @else
-                                <div class="overflow-hidden rounded-lg border border-gray-200">
-                                    <table class="min-w-full divide-y divide-gray-200 text-sm">
-                                        <thead class="bg-gray-50">
-                                            <tr>
-                                                <th class="px-3 py-2 text-left font-medium text-gray-600">Nama</th>
-                                                <th class="px-3 py-2 text-left font-medium text-gray-600">Jumlah</th>
-                                                <th class="px-3 py-2 text-left font-medium text-gray-600">Waktu</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-gray-100 bg-white">
-                                            @foreach ($donations as $d)
-                                                <tr>
-                                                    <td class="px-3 py-2">{{ $d->is_anonymous ? 'Anonim' : ($d->donor_name ?: '—') }}</td>
-                                                    <td class="px-3 py-2">Rp {{ number_format((float)$d->amount, 2, ',', '.') }}</td>
-                                                    <td class="px-3 py-2">{{ optional($d->paid_at)->format('d M Y H:i') }}</td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
+                                <ul class="divide-y divide-gray-100 rounded-lg border border-gray-200 bg-white">
+                                    @foreach ($donations as $d)
+                                        @php
+                                            $displayName = $d->is_anonymous ? 'Hamba Allah' : ($d->donor_name ?: '—');
+                                            $parts = preg_split('/\s+/', trim($displayName));
+                                            $initials = '';
+                                            foreach ($parts as $p) { if ($p !== '') { $initials .= mb_substr($p, 0, 1); if (mb_strlen($initials) >= 2) break; } }
+                                            $initials = mb_strtoupper($initials ?: 'NA');
+                                        @endphp
+                                        <li class="flex items-center gap-3 px-4 py-3">
+                                            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-semibold text-gray-700">{{ $initials }}</div>
+                                            <div class="min-w-0 flex-1">
+            									<div class="flex items-start justify-between gap-3">
+                                                    <div>
+                                                        <div class="text-sm font-semibold text-gray-900">{{ $displayName }}</div>
+                                                        <div class="text-xs text-gray-500">{{ optional($d->paid_at)->diffForHumans() }}</div>
+                                                    </div>
+                                                    <div class="text-sm font-semibold text-gray-900 whitespace-nowrap">Rp {{ number_format((float) $d->amount, 0, ',', '.') }}</div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    @endforeach
+                                </ul>
                                 <div class="mt-4">{{ $donations->links() }}</div>
                             @endif
                         @endif
