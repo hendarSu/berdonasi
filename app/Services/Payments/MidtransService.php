@@ -80,6 +80,7 @@ class MidtransService
             'customer_details' => [
                 'first_name' => $donation->donor_name ?: 'Donatur',
                 'email' => $donation->donor_email ?: 'donatur@example.test',
+                'phone' => $donation->donor_phone ?: null,
             ],
             'callbacks' => [
                 'finish' => route('donation.thanks', ['reference' => $donation->reference]),

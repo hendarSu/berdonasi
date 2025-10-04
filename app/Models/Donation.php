@@ -16,6 +16,7 @@ class Donation extends Model
         'user_id',
         'donor_name',
         'donor_email',
+        'donor_phone',
         'is_anonymous',
         'amount',
         'currency',

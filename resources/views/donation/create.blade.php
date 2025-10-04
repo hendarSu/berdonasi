@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donasi — {{ $c->title }} — {{ env('APP_NAME') }}</title>
+    @vite(['resources/css/app.css','resources/js/app.js'])
+</head>
+<body class="bg-gray-50 text-gray-900">
+    <header class="bg-white border-b border-gray-200">
+        <div class="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between gap-4">
+            <a href="{{ route('campaign.show', $c->slug) }}" class="text-sky-600 hover:text-sky-700">← Kembali</a>
+            {{-- <div class="text-sm text-gray-600">{{ $c->title }}</div> --}}
+        </div>
+    </header>
+
+    <main class="mx-auto max-w-2xl px-4 py-8">
+        <div class="rounded-md bg-white p-5 shadow">
+            <h1 class="mb-4 text-xl font-semibold">Donasi untuk: {{ $c->title }}</h1>
+            <form method="post" action="{{ route('campaign.donate', $c->slug) }}" class="space-y-3">
+                @csrf
+                @php
+                    $presets = [50000,100000,200000,500000];
+                @endphp
+                <div>
+                    <label class="mb-1 block text-sm text-gray-700">Jumlah Donasi (Rp)</label>
+                    <div class="mb-2 grid grid-cols-4 gap-2">
+                        @foreach ($presets as $preset)
+                            <button type="button" data-amount="{{ $preset }}" class="preset-amount rounded-md border border-gray-200 bg-gray-50 px-2 py-1 text-xs hover:border-sky-400">{{ number_format($preset,0,',','.') }}</button>
+                        @endforeach
+                    </div>
+                    <input id="amount-input" type="number" name="amount" min="1000" step="1000" required class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400" placeholder="100000" />
+                </div>
+                <div class="grid grid-cols-1 gap-3">
+                    <div>
+                        <label class="mb-1 block text-sm text-gray-700">Nama</label>
+                        <input type="text" name="donor_name" required class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400" />
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm text-gray-700">Nomor HP</label>
+                        <input type="text" name="donor_phone" required class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400" />
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm text-gray-700">Email <span class="text-gray-500">(opsional)</span></label>
+                        <input type="email" name="donor_email" placeholder="Opsional" class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400" />
+                    </div>
+                </div>
+                <div>
+                    <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                        <input type="checkbox" name="is_anonymous" value="1" class="rounded border-gray-300 text-sky-600 focus:ring-sky-500" />
+                        Sembunyikan nama (anonim)
+                    </label>
+                </div>
+                <div>
+                    <label class="mb-1 block text-sm text-gray-700">Doa Terbaik</label>
+                    <input type="text" name="message" class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400" />
+                </div>
+                <div class="mt-3">
+                    <button type="submit" class="w-full inline-flex items-center justify-center rounded-md bg-orange-500 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-orange-600">Lanjutkan Pembayaran</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        document.querySelectorAll('.preset-amount').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const val = btn.getAttribute('data-amount');
+                const input = document.getElementById('amount-input');
+                if (input) input.value = val;
+            });
+        });
+    </script>
+</body>
+</html>
+

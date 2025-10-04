@@ -10,6 +10,18 @@ use Illuminate\Support\Str;
 
 class CampaignController extends Controller
 {
+    public function donateForm(Request $request, string $slug)
+    {
+        $campaign = Campaign::query()
+            ->with(['organization:id,name,meta_json'])
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        return view('donation.create', [
+            'c' => $campaign,
+        ]);
+    }
+
     public function show(Request $request, string $slug)
     {
         $campaign = Campaign::query()
@@ -34,11 +46,27 @@ class CampaignController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+        // Related campaigns: share at least one category, exclude current, limit 2
+        $categoryIds = $campaign->categories->pluck('id');
+        $related = collect();
+        if ($categoryIds->isNotEmpty()) {
+            $related = Campaign::query()
+                ->with(['media' => fn ($q) => $q->orderBy('sort_order')])
+                ->where('id', '!=', $campaign->id)
+                ->whereHas('categories', function ($q) use ($categoryIds) {
+                    $q->whereIn('categories.id', $categoryIds);
+                })
+                ->orderByDesc('updated_at')
+                ->limit(2)
+                ->get();
+        }
+
         return view('campaign.show', [
             'c' => $campaign,
             'tab' => $tab,
             'articles' => $articles,
             'donations' => $donations,
+            'related' => $related,
         ]);
     }
 
@@ -48,7 +76,8 @@ class CampaignController extends Controller
 
         $data = $request->validate([
             'amount' => ['required', 'numeric', 'min:1000'],
-            'donor_name' => ['nullable', 'string', 'max:255'],
+            'donor_name' => ['required', 'string', 'max:255'],
+            'donor_phone' => ['required', 'string', 'max:30'],
             'donor_email' => ['nullable', 'email', 'max:255'],
             'is_anonymous' => ['sometimes', 'boolean'],
             'message' => ['nullable', 'string', 'max:255'],
@@ -61,6 +90,7 @@ class CampaignController extends Controller
             'user_id' => auth()->id(),
             'donor_name' => $data['donor_name'] ?? null,
             'donor_email' => $data['donor_email'] ?? null,
+            'donor_phone' => $data['donor_phone'] ?? null,
             'is_anonymous' => (bool)($data['is_anonymous'] ?? false),
             'amount' => $data['amount'],
             'currency' => 'IDR',
