@@ -7,6 +7,8 @@ use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 
 class MediaRelationManager extends RelationManager
 {
@@ -34,7 +36,11 @@ class MediaRelationManager extends RelationManager
                             ])
                             ->default('desktop')
                             ->native(false)
-                            ->required(),
+                            ->required()
+                            ->live()
+                            ->afterStateUpdated(function ($state, Set $set) {
+                                $set('sort_order', $state === 'mobile' ? 1 : 2);
+                            }),
                         Forms\Components\FileUpload::make('path')
                             ->label('Gambar')
                             ->image()
@@ -49,7 +55,7 @@ class MediaRelationManager extends RelationManager
                             ->required(),
                         Forms\Components\TextInput::make('sort_order')
                             ->numeric()
-                            ->default(0)
+                            ->default(fn (Get $get) => $get('platform') === 'mobile' ? 1 : 2)
                             ->helperText('Urutan tampil, kecil lebih dulu'),
                     ])
                     ->columns(2),
