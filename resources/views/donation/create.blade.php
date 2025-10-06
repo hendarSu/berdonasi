@@ -20,7 +20,7 @@
             <form method="post" action="{{ route('campaign.donate', $c->slug) }}" class="space-y-3" id="donation-form">
                 @csrf
                 @php
-                    $presets = [50000,100000,200000,500000];
+                    $presets = [50000,250000,500000,1000000, 1500000, 2500000, 5000000, 10000000];
                 @endphp
                 <div>
                     <label class="mb-1 block text-sm text-gray-700">Jumlah Donasi (Rp)</label>
