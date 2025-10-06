@@ -150,13 +150,13 @@
                                 </div>
                             @endif
 
-                            @if ($c->media->count() > 1)
+                            {{-- @if ($c->media->count() > 1)
                                 <div class="mt-4 mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
                                     @foreach ($mSorted->values()->skip(1) as $m)
                                         <img src="{{ $m->url }}" class="aspect-video w-full rounded-lg object-cover js-media-click cursor-zoom-in" alt="media" />
                                     @endforeach
                                 </div>
-                            @endif
+                            @endif --}}
 
                             @if ($c->summary)
                                 <p class="mb-3 text-gray-700">{{ $c->summary }}</p>
