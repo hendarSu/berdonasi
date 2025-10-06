@@ -23,6 +23,7 @@ Route::get('/laporan/{id}/{slug?}', [CampaignArticleController::class, 'show'])-
 Route::get('/media/{disk}', [MediaProxyController::class, 'show'])->name('media.proxy');
 
 Route::get('/donasi/{reference}/terima-kasih', [DonationController::class, 'thanks'])->name('donation.thanks');
+Route::get('/donasi/{reference}/terima-kasih', [DonationController::class, 'thanks'])->name('donation.thanks');
 
 // Pembayaran (Midtrans)
 Route::get('/donasi/{reference}/bayar', [PaymentController::class, 'pay'])->name('donation.pay');
@@ -39,14 +40,9 @@ Route::post('/wa/validate-number', [WaController::class, 'validateNumber'])
 // News (storefront)
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\PageController;
+
 Route::get('/berita', [NewsController::class, 'index'])->name('news.index');
 Route::get('/berita/{slug}', [NewsController::class, 'show'])->name('news.show');
 
 // Static Pages (storefront)
 Route::get('/p/{slug}', [PageController::class, 'show'])->name('page.show');
-
-// Fallback for POST /admin/login (some proxies/browsers may POST empty body)
-// Redirect back to GET login page to avoid MethodNotAllowed.
-Route::post('/admin/login', function () {
-    return redirect('/admin/login');
-})->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
