@@ -28,7 +28,8 @@ class Donors extends Page implements HasTable
 
     protected function getTableQuery(): Builder
     {
-        $identityExpr = "COALESCE(NULLIF(TRIM(donor_email), ''), NULLIF(TRIM(donor_phone), ''), NULLIF(TRIM(donor_name), ''))";
+        // Grouping preference: phone number first, then email, then name
+        $identityExpr = "COALESCE(NULLIF(TRIM(donor_phone), ''), NULLIF(TRIM(donor_email), ''), NULLIF(TRIM(donor_name), ''))";
         $identity = DB::raw($identityExpr);
 
         return Donation::query()
@@ -85,10 +86,7 @@ class Donors extends Page implements HasTable
         ];
     }
 
-    protected function getTableHeaderActions(): array
-    {
-        return [];
-    }
+    
 
     protected function getTableActions(): array
     {
@@ -100,7 +98,8 @@ class Donors extends Page implements HasTable
                 ->modalCancelActionLabel('Tutup')
                 ->modalContent(function ($record) {
                     $identity = (string) ($record->getAttribute('identity') ?? '');
-                    $identityExpr = "COALESCE(NULLIF(TRIM(donor_email), ''), NULLIF(TRIM(donor_phone), ''), NULLIF(TRIM(donor_name), ''))";
+                    // Use same identity expression (phone first) as the table query
+                    $identityExpr = "COALESCE(NULLIF(TRIM(donor_phone), ''), NULLIF(TRIM(donor_email), ''), NULLIF(TRIM(donor_name), ''))";
 
                     $rows = Donation::query()
                         ->select([
@@ -126,5 +125,67 @@ class Donors extends Page implements HasTable
     protected function getTableEmptyStateHeading(): ?string
     {
         return 'Belum ada data donatur';
+    }
+
+    // Avoid default sorting by base table key (donations.id) which breaks with ONLY_FULL_GROUP_BY.
+    // Sort by an aggregated field instead.
+    protected function getDefaultTableSortColumn(): ?string
+    {
+        return 'last_paid_at';
+    }
+
+    protected function getDefaultTableSortDirection(): ?string
+    {
+        return 'desc';
+    }
+
+    protected function getTableHeaderActions(): array
+    {
+        return [
+            Tables\Actions\Action::make('export')
+                ->label('Export CSV')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->action(function () {
+                    // Rebuild the same aggregate query used for the table
+                    $identityExpr = "COALESCE(NULLIF(TRIM(donor_phone), ''), NULLIF(TRIM(donor_email), ''), NULLIF(TRIM(donor_name), ''))";
+
+                    $rows = Donation::query()
+                        ->select([
+                            DB::raw("MAX(donor_name) as donor_name"),
+                            DB::raw("MAX(donor_email) as donor_email"),
+                            DB::raw("MAX(donor_phone) as donor_phone"),
+                            DB::raw("SUM(CASE WHEN status='paid' THEN amount ELSE 0 END) as total_amount"),
+                            DB::raw("SUM(CASE WHEN status='paid' THEN 1 ELSE 0 END) as donation_count"),
+                            DB::raw("MAX(paid_at) as last_paid_at"),
+                            DB::raw($identityExpr . " as identity"),
+                        ])
+                        ->where(function ($w) {
+                            $w->whereNotNull('donor_email')
+                              ->orWhereNotNull('donor_phone')
+                              ->orWhereNotNull('donor_name');
+                        })
+                        ->groupBy(DB::raw($identityExpr))
+                        ->orderByDesc(DB::raw('MAX(paid_at)'))
+                        ->get();
+
+                    return response()->streamDownload(function () use ($rows) {
+                        $out = fopen('php://output', 'w');
+                        // Header
+                        fputcsv($out, ['Identity', 'Nama', 'Email', 'Nomor HP', 'Total Donasi', 'Transaksi', 'Terakhir Bayar']);
+                        foreach ($rows as $r) {
+                            fputcsv($out, [
+                                (string) ($r->identity ?? ''),
+                                (string) ($r->donor_name ?? ''),
+                                (string) ($r->donor_email ?? ''),
+                                (string) ($r->donor_phone ?? ''),
+                                (string) ($r->total_amount ?? '0'),
+                                (string) ($r->donation_count ?? '0'),
+                                optional($r->last_paid_at)->toDateTimeString() ?? '',
+                            ]);
+                        }
+                        fclose($out);
+                    }, 'donors.csv');
+                }),
+        ];
     }
 }
