@@ -17,7 +17,7 @@
     <main class="mx-auto max-w-2xl px-4 py-8">
         <div class="rounded-md bg-white p-5 shadow">
             <h1 class="mb-4 text-xl font-semibold">Donasi untuk: {{ $c->title }}</h1>
-            <form method="post" action="{{ route('campaign.donate', $c->slug) }}" class="space-y-3">
+            <form method="post" action="{{ route('campaign.donate', $c->slug) }}" class="space-y-3" id="donation-form">
                 @csrf
                 @php
                     $presets = [50000,100000,200000,500000];
@@ -39,6 +39,10 @@
                     <div>
                         <label class="mb-1 block text-sm text-gray-700">Nomor HP</label>
                         <input type="text" name="donor_phone" required class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400" />
+                        @error('donor_phone')
+                        <div class="mt-1 text-xs text-red-600">{{ $message }}</div>
+                        @enderror
+                        <div id="wa-hint" class="mt-1 text-xs text-gray-500 hidden">Memeriksa nomor WhatsApp…</div>
                     </div>
                     <div>
                         <label class="mb-1 block text-sm text-gray-700">Email <span class="text-gray-500">(opsional)</span></label>
@@ -55,14 +59,22 @@
                     <label class="mb-1 block text-sm text-gray-700">Doa Terbaik</label>
                     <input type="text" name="message" class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400" />
                 </div>
-                <div class="mt-3">
-                    <button type="submit" class="w-full inline-flex items-center justify-center rounded-md bg-orange-500 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-orange-600">Lanjutkan Pembayaran</button>
+                <div class="mt-3 relative" id="submit-wrapper">
+                    <button id="submit-btn" type="submit" class="w-full inline-flex items-center justify-center rounded-md bg-orange-500 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-orange-600">Lanjutkan Pembayaran</button>
+                    <div id="wa-block-overlay" class="hidden absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center text-sm text-gray-700 rounded-md" style="
+    background: #c0c0c0;
+">
+                        Nomor WhatsApp tidak valid.
+                    </div>
                 </div>
             </form>
         </div>
     </main>
 
     <script>
+        window.WA_VALIDATE_ENABLED = {{ isset($waValidationEnabled) && $waValidationEnabled ? 'true' : 'false' }};
+        window.WA_VALIDATE_URL = '{{ route('wa.validate') }}';
+
         document.querySelectorAll('.preset-amount').forEach(btn => {
             btn.addEventListener('click', () => {
                 const val = btn.getAttribute('data-amount');
@@ -70,7 +82,70 @@
                 if (input) input.value = val;
             });
         });
+
+        (function() {
+            if (!window.WA_VALIDATE_ENABLED) return;
+
+            const form = document.getElementById('donation-form');
+            const phoneInput = form.querySelector('input[name="donor_phone"]');
+            const submitBtn = document.getElementById('submit-btn');
+            const overlay = document.getElementById('wa-block-overlay');
+            const hint = document.getElementById('wa-hint');
+
+            let currentValid = true;
+            let timer = null;
+
+            function setValidState(isValid) {
+                currentValid = !!isValid;
+                if (currentValid) {
+                    overlay.classList.add('hidden');
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-60','cursor-not-allowed');
+                } else {
+                    overlay.classList.remove('hidden');
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-60','cursor-not-allowed');
+                }
+            }
+
+            async function validateNow() {
+                const number = (phoneInput.value || '').trim();
+                if (number === '') { setValidState(false); return; }
+                hint.classList.remove('hidden');
+                try {
+                    const resp = await fetch(window.WA_VALIDATE_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': (form.querySelector('input[name="_token"]').value),
+                        },
+                        body: JSON.stringify({ number })
+                    });
+                    const data = await resp.json();
+                    const ok = !!(data && data.ok !== false);
+                    const isReg = !!(data && data.isRegistered !== false);
+                    setValidState(ok && isReg);
+                } catch (e) {
+                    setValidState(false);
+                } finally {
+                    hint.classList.add('hidden');
+                }
+            }
+
+            function debounceValidate() {
+                if (timer) clearTimeout(timer);
+                timer = setTimeout(validateNow, 500);
+            }
+
+            phoneInput.addEventListener('input', debounceValidate);
+            phoneInput.addEventListener('blur', validateNow);
+
+            // Initial state
+            setValidState(false);
+        })();
+
     </script>
 </body>
 </html>
-

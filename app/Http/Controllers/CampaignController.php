@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Campaign;
 use App\Models\CampaignArticle;
 use App\Models\Donation;
+use App\Services\WaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -17,8 +18,12 @@ class CampaignController extends Controller
             ->where('slug', $slug)
             ->firstOrFail();
 
+        $waCfg = (new WaService())->getConfig();
+        $waValidationEnabled = (bool)($waCfg['validate_enabled'] ?? false) && !empty($waCfg['validate_client_id']);
+
         return view('donation.create', [
             'c' => $campaign,
+            'waValidationEnabled' => $waValidationEnabled,
         ]);
     }
 
@@ -82,6 +87,16 @@ class CampaignController extends Controller
             'is_anonymous' => ['sometimes', 'boolean'],
             'message' => ['nullable', 'string', 'max:255'],
         ]);
+
+        // Optional WA number validation (server-side)
+        $waCfg = (new WaService())->getConfig();
+        if ((bool)($waCfg['validate_enabled'] ?? false) && !empty($waCfg['validate_client_id'])) {
+            $svc = new WaService();
+            $check = $svc->validateNumber($data['donor_phone']);
+            if (! ($check['isRegistered'] ?? false)) {
+                return back()->withErrors(['donor_phone' => 'Nomor WhatsApp tidak valid atau belum terdaftar.'])->withInput();
+            }
+        }
 
         $ref = 'DN-' . now()->format('Ymd-His') . '-' . Str::upper(Str::random(6));
 

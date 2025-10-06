@@ -8,6 +8,7 @@ use App\Http\Controllers\DonorController;
 use App\Http\Controllers\CampaignArticleController;
 use App\Http\Controllers\MediaProxyController;
 use App\Http\Controllers\ProgramController;
+use App\Http\Controllers\WaController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/campaigns/chunk', [HomeController::class, 'chunk'])->name('home.chunk');
@@ -28,6 +29,11 @@ Route::post('/midtrans/notify', [PaymentController::class, 'notify'])->name('mid
 
 // Donor CRM (public simple listing)
 Route::get('/donatur', [DonorController::class, 'index'])->name('donor.index');
+
+// Public AJAX endpoint to validate WA number from donation form
+Route::post('/wa/validate-number', [WaController::class, 'validateNumber'])
+    ->middleware(\App\Http\Middleware\InternalOnly::class)
+    ->name('wa.validate');
 
 // News (storefront)
 use App\Http\Controllers\NewsController;

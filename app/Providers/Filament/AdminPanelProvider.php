@@ -54,6 +54,7 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 NavigationGroup::make('Utama')->icon('heroicon-o-home')->collapsed(false),
                 NavigationGroup::make('Manajemen')->icon('heroicon-o-cog-6-tooth'),
+                NavigationGroup::make('Integrasi')->icon('heroicon-o-link'),
                 NavigationGroup::make('Laporan')->icon('heroicon-o-chart-bar'),
             ])
             ->middleware([
