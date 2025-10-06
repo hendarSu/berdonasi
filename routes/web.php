@@ -11,6 +11,7 @@ use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\WaController;
 use App\Http\Controllers\DonationController;
 use App\Http\Controllers\AdminAuthController;
+use Filament\Facades\Filament;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/campaigns/chunk', [HomeController::class, 'chunk'])->name('home.chunk');
@@ -48,7 +49,9 @@ Route::get('/berita/{slug}', [NewsController::class, 'show'])->name('news.show')
 // Static Pages (storefront)
 Route::get('/p/{slug}', [PageController::class, 'show'])->name('page.show');
 
-// // Admin login (POST handler for HTML forms). Filament serves GET /admin/login.
-// Route::post('/admin/login', [AdminAuthController::class, 'login'])
-//     ->name('admin.login.submit')
-//     ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+// Optional compatibility: register Filament routes if available (v2 style)
+Route::middleware(['web'])->group(function () {
+    if (method_exists(Filament::class, 'routes')) {
+        Filament::routes();
+    }
+});
