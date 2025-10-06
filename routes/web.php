@@ -49,4 +49,4 @@ Route::get('/p/{slug}', [PageController::class, 'show'])->name('page.show');
 // Redirect back to GET login page to avoid MethodNotAllowed.
 Route::post('/admin/login', function () {
     return redirect('/admin/login');
-});
+})->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
