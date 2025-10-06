@@ -6,7 +6,7 @@
     <title>Donasi — {{ $c->title }} — {{ env('APP_NAME') }}</title>
     @vite(['resources/css/app.css','resources/js/app.js'])
 </head>
-<body class="bg-gray-50 text-gray-900">
+<body class="bg-white sm:bg-gray-50 text-gray-900">
     <header class="bg-white border-b border-gray-200">
         <div class="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between gap-4">
             <a href="{{ route('campaign.show', $c->slug) }}" class="text-sky-600 hover:text-sky-700">← Kembali</a>
@@ -15,7 +15,7 @@
     </header>
 
     <main class="mx-auto max-w-2xl px-4 py-8">
-        <div class="rounded-md bg-white p-5 shadow">
+        <div class="rounded-md p-0 ">
             <h1 class="mb-4 text-xl font-semibold">Donasi untuk: {{ $c->title }}</h1>
             <form method="post" action="{{ route('campaign.donate', $c->slug) }}" class="space-y-3" id="donation-form">
                 @csrf
