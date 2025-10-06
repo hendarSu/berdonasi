@@ -10,8 +10,6 @@ use App\Http\Controllers\MediaProxyController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\WaController;
 use App\Http\Controllers\DonationController;
-use App\Http\Controllers\AdminAuthController;
-use Filament\Facades\Filament;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/campaigns/chunk', [HomeController::class, 'chunk'])->name('home.chunk');
@@ -48,10 +46,3 @@ Route::get('/berita/{slug}', [NewsController::class, 'show'])->name('news.show')
 
 // Static Pages (storefront)
 Route::get('/p/{slug}', [PageController::class, 'show'])->name('page.show');
-
-// Optional compatibility: register Filament routes if available (v2 style)
-Route::middleware(['web'])->group(function () {
-    if (method_exists(Filament::class, 'routes')) {
-        Filament::routes();
-    }
-});
