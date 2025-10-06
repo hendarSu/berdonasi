@@ -49,4 +49,6 @@ Route::get('/berita/{slug}', [NewsController::class, 'show'])->name('news.show')
 Route::get('/p/{slug}', [PageController::class, 'show'])->name('page.show');
 
 // Admin login (POST handler for HTML forms). Filament serves GET /admin/login.
-Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
+Route::post('/admin/login', [AdminAuthController::class, 'login'])
+    ->name('admin.login.submit')
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
