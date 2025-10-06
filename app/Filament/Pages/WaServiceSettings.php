@@ -75,7 +75,7 @@ class WaServiceSettings extends Page implements HasForms
             'message_template' => $cfg['message_template'] ?? (
                 <<<HTML
 <p>Halo {donor_name},</p>
-<p>Terima kasih atas niat baik Anda untuk berdonasi di kampanye "{campaign_title}".</p>
+<p>Terima kasih atas niat baik Anda untuk berdonasi di program "{campaign_title}".</p>
 <p>Nominal: Rp {amount}
 <br/>Referensi: {donation_reference}</p>
 <p>Silakan selesaikan pembayaran melalui tautan berikut:

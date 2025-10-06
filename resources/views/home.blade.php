@@ -231,7 +231,7 @@
         </section>
 
         @if ($campaigns->count() === 0)
-            <div class="rounded-md border border-gray-200 bg-white p-6 text-center text-gray-600 mb-5">Belum ada kampanye.</div>
+            <div class="rounded-md border border-gray-200 bg-white p-6 text-center text-gray-600 mb-5">Belum ada program.</div>
         @else
             <div id="campaign-grid" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-5">
                 @include('partials.campaign-cards', ['campaigns' => $campaigns])
