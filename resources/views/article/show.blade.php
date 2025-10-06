@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $a->title }} — {{ $c->title }} — {{ env('APP_NAME') }}</title>
     @vite(['resources/css/app.css','resources/js/app.js'])
+    <style>
+        /* Hide Trix attachment captions (file names) under images */
+        .prose figure.attachment .attachment__caption,
+        .prose figure.trix-attachment .attachment__caption { display: none !important; }
+        /* Add vertical spacing to images from rich text */
+        .prose img { margin-top: 1.25rem; margin-bottom: 1.25rem; }
+        .prose figure { margin-top: 1.25rem; margin-bottom: 1.25rem; }
+    </style>
 </head>
 <body class="bg-gray-50 text-gray-900">
     <header class="bg-white border-b border-gray-200">
@@ -26,7 +34,7 @@
             @endif
             @if ($a->body_md)
                 <div class="prose max-w-none bg-white p-4 rounded-md shadow">
-                    {!! $a->body_md !!}
+                    {!! $a->body_html !!}
                 </div>
             @endif
         </article>

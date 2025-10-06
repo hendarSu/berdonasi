@@ -66,7 +66,7 @@ class CampaignArticleResource extends Resource
                             ->fileAttachmentsDirectory('articles')
                             ->fileAttachmentsVisibility('private')
                             ->toolbarButtons([
-                                'bold', 'italic', 'strike', 'underline', 'link', 'blockquote', 'codeBlock', 'h2', 'h3', 'bulletList', 'orderedList', 'attachment', 'undo', 'redo'
+                                'bold', 'italic', 'strike', 'underline', 'link', 'blockquote', 'codeBlock', 'h2', 'h3', 'bulletList', 'orderedList', 'attachFiles', 'undo', 'redo'
                             ]),
                     ]),
             ]);

@@ -48,7 +48,7 @@ class NewsResource extends Resource
                 Forms\Components\FileUpload::make('cover_path')->label('Cover')->image()->disk('s3')->directory('news/covers')->visibility('private')->imageEditor()->imagePreviewHeight('180'),
                 Forms\Components\RichEditor::make('body_md')->label('Isi')->columnSpanFull()
                     ->fileAttachmentsDisk('s3')->fileAttachmentsDirectory('news')->fileAttachmentsVisibility('private')
-                    ->toolbarButtons(['bold','italic','underline','strike','link','blockquote','h2','h3','bulletList','orderedList','attachment','undo','redo']),
+                    ->toolbarButtons(['bold','italic','underline','strike','link','blockquote','h2','h3','bulletList','orderedList','attachFiles','undo','redo']),
                 Forms\Components\DateTimePicker::make('published_at')->label('Terbit')->seconds(false),
             ]),
             Forms\Components\Section::make('SEO')->columns(2)->schema([

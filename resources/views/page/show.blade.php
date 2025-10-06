@@ -24,6 +24,14 @@
         <meta property="og:image" content="{{ $metaImage }}">
     @endif
     @vite(['resources/css/app.css','resources/js/app.js'])
+    <style>
+        /* Hide Trix attachment captions (file names) under images */
+        .prose figure.attachment .attachment__caption,
+        .prose figure.trix-attachment .attachment__caption { display: none !important; }
+        /* Add vertical spacing to images from rich text */
+        .prose img { margin-top: 1.25rem; margin-bottom: 1.25rem; }
+        .prose figure { margin-top: 1.25rem; margin-bottom: 1.25rem; }
+    </style>
   </head>
   <body class="bg-gray-50 text-gray-900">
     <header class="bg-white border-b border-gray-200">
@@ -42,10 +50,9 @@
         <article class="space-y-4">
             <h1 class="text-2xl font-bold">{{ $p->title }}</h1>
             <div class="prose max-w-none bg-white p-5 rounded-md shadow">
-                {!! $p->body_md !!}
+                {!! $p->body_html !!}
             </div>
         </article>
     </main>
   </body>
  </html>
-

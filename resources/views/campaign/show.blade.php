@@ -206,10 +206,6 @@
                                                     <a class="text-sky-700 hover:underline"
                                                        href="{{ route('article.show', ['id' => $a->id, 'slug' => \Illuminate\Support\Str::slug($a->title)]) }}">{{ $a->title }}</a>
                                                 </h3>
-                                                {{-- @if ($a->cover_url)
-                                                    <img src="{{ $a->cover_url }}" alt="Cover"
-                                                         class="mt-1 mb-2 w-full max-w-md rounded object-cover" />
-                                                @endif --}}
                                                 @if ($a->payout?->amount)
                                                     <div
                                                          class="mb-2 inline-block rounded-full bg-orange-50 px-2 py-1 text-xs text-orange-700 ring-1 ring-orange-200">
