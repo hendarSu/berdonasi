@@ -7,14 +7,15 @@
     @vite(['resources/css/app.css','resources/js/app.js'])
 </head>
 <body class="bg-gray-50 text-gray-900">
-    <main class="mx-auto flex min-h-screen max-w-2xl items-center justify-center px-4">
-        <div class="w-full rounded-xl bg-white p-8 text-center shadow">
-            <h1 class="mb-2 text-2xl font-bold">Terima kasih!</h1>
+    <main class="bg-white mx-auto flex min-h-screen max-w-2xl items-center justify-center px-4">
+        <div class="w-full bg-white p-8 text-center">
+            <div class="mb-4 flex justify-center">
+                <img src="{{ asset('image/terimakasih.png') }}" alt="Terima kasih" class="max-h-40 w-auto" />
+            </div>
             <p class="text-gray-600">Permintaan donasi Anda sudah tercatat.</p>
-            <p class="mt-2 text-sm text-gray-500">Kode referensi: <span class="font-mono">{{ request('reference') }}</span></p>
             <a href="{{ route('home') }}" class="mt-6 inline-flex items-center rounded-md bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-sky-700">Kembali ke beranda</a>
+
         </div>
     </main>
 </body>
 </html>
-

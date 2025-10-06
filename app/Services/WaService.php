@@ -20,6 +20,10 @@ class WaService
             'headers' => (array)($cfg['headers'] ?? Arr::get($cfg, 'value_secret', [])),
             'validate_client_id' => (string)($cfg['validate_client_id'] ?? ''),
             'validate_enabled' => (bool)($cfg['validate_enabled'] ?? false),
+            'send_enabled' => (bool)($cfg['send_enabled'] ?? false),
+            'send_client_id' => (string)($cfg['send_client_id'] ?? ''),
+            'message_template' => (string)($cfg['message_template'] ?? ''),
+            'send_max_attempts' => (int)($cfg['send_max_attempts'] ?? 8),
         ];
     }
 
@@ -224,6 +228,100 @@ class WaService
         }
 
         return [];
+    }
+
+    /**
+     * Send a plain text WhatsApp message using configured WA service.
+     * Returns true on HTTP 2xx response.
+     */
+    public function sendText(string $number, string $message, ?string $clientId = null): bool
+    {
+        $config = $this->getConfig();
+        $base = $config['url'];
+        $clientId = $clientId ?: ($config['send_client_id'] ?? '');
+        if ($clientId === '' || trim($number) === '' || trim($message) === '') {
+            return false;
+        }
+
+        // According to WA service spec: POST /messages
+        $payload = [
+            'clientId' => $clientId,
+            'to' => $number,
+            'text' => $message,
+            'maxAttempts' => (int)($config['send_max_attempts'] ?? 8),
+        ];
+
+        $primaryUrl = $base;
+        $triedFallback = false;
+        retry:
+        try {
+            $res = $this->client($base)->post('/messages', $payload);
+            if (! $res->successful()) return false;
+            $body = $res->json();
+            // Treat queued/ok as success
+            $status = is_array($body) ? (data_get($body, 'data.status') ?: data_get($body, 'status')) : null;
+            return $status ? true : true; // 2xx is enough; keep simple
+        } catch (\Throwable $e) {
+            if (! $triedFallback && str_starts_with($primaryUrl, 'https://')) {
+                $triedFallback = true;
+                $base = 'http://' . ltrim(substr($primaryUrl, strlen('https://')), '/');
+                goto retry;
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Replace placeholders in a template with values.
+     * Placeholders use {key} format.
+     * If template is HTML, convert to plain text with newlines.
+     */
+    public function renderTemplate(string $template, array $vars): string
+    {
+        $map = [];
+        foreach ($vars as $k => $v) {
+            $map['{' . $k . '}'] = (string) $v;
+        }
+        $rendered = strtr($template, $map);
+        return $this->htmlToText($rendered);
+    }
+
+    protected function htmlToText(string $html): string
+    {
+        // Normalize CRLF/CR to LF
+        $text = preg_replace("/\r\n|\r/", "\n", $html) ?? $html;
+
+        // Convert key HTML semantics to plain text newlines
+        $patterns = [
+            // Close block elements => double newline (paragraph spacing)
+            '/<\/(p|div|h[1-6]|blockquote)>/i' => "\n\n",
+            // Line breaks
+            '/<br\s*\/?\>/i' => "\n",
+            // Lists
+            '/<li[^>]*>/i' => "- ",
+            '/<\/li>/i' => "\n",
+            '/<\/(ul|ol)>/i' => "\n\n",
+            '/<(ul|ol)[^>]*>/i' => "\n",
+        ];
+        foreach ($patterns as $pattern => $replacement) {
+            $text = preg_replace($pattern, $replacement, $text) ?? $text;
+        }
+
+        // Strip any remaining tags
+        $text = strip_tags($text);
+
+        // Decode entities and normalize NBSP
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = str_replace("\xC2\xA0", ' ', $text);
+
+        // Collapse excessive blank lines to at most one empty line between paragraphs
+        $text = preg_replace("/\n{3,}/", "\n\n", $text) ?? $text;
+
+        // Trim line endings but preserve empty lines
+        $lines = array_map(fn ($l) => rtrim($l), explode("\n", $text));
+        $text = implode("\n", $lines);
+
+        return trim($text);
     }
 }
 

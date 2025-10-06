@@ -38,8 +38,11 @@
         <div class="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between gap-4">
             <a href="{{ route('news.index') }}" class="text-sky-600 hover:text-sky-700">← Kembali ke Berita</a>
             <nav class="hidden md:flex items-center gap-6 text-sm">
-                <a href="{{ route('home') }}" class="text-gray-700 hover:text-sky-700">Program</a>
-                <a href="{{ route('news.index') }}" class="text-sky-700 font-medium">Berita</a>
+                @php
+                    $tabBase = 'text-gray-700 hover:text-sky-700';
+                    $tabActive = 'text-sky-700 font-medium';
+                @endphp
+                @include('partials.menu-links', ['tabBase' => $tabBase, 'tabActive' => $tabActive])
             </nav>
         </div>
     </header>

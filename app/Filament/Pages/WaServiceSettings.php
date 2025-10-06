@@ -3,11 +3,13 @@
 namespace App\Filament\Pages;
 
 use App\Models\Organization;
+use App\Services\WaService;
 use Filament\Forms;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
@@ -32,6 +34,7 @@ class WaServiceSettings extends Page implements HasForms
     public array $data = [];
 
     public ?Organization $org = null;
+    public array $accountOptions = [];
 
     public function mount(): void
     {
@@ -39,12 +42,47 @@ class WaServiceSettings extends Page implements HasForms
         $meta = $this->org?->meta_json ?? [];
         $cfg = data_get($meta, 'integrations.wa_service', data_get($meta, 'wa_service', []));
 
+        // Load WA accounts as select options
+        try {
+            $accounts = (new WaService())->listAccounts();
+            $opts = [];
+            foreach ($accounts as $row) {
+                $cid = (string)($row['clientId'] ?? '');
+                if ($cid !== '') {
+                    $status = strtoupper((string)($row['status'] ?? ''));
+                    $opts[$cid] = $status ? ($cid . ' — ' . $status) : $cid;
+                }
+            }
+            // Ensure existing configured values appear in options
+            foreach ([(string)($cfg['validate_client_id'] ?? ''), (string)($cfg['send_client_id'] ?? '')] as $existing) {
+                if ($existing !== '' && ! array_key_exists($existing, $opts)) {
+                    $opts[$existing] = $existing;
+                }
+            }
+            $this->accountOptions = $opts;
+        } catch (\Throwable $e) {
+            $this->accountOptions = [];
+        }
+
         $this->form->fill([
             'url' => $cfg['url'] ?? 'http://localhost:3100',
             'type_secret' => $cfg['type_secret'] ?? 'headers',
             'headers' => $cfg['headers'] ?? ($cfg['value_secret'] ?? ['x-api-key' => 'keyadmin']),
             'validate_client_id' => $cfg['validate_client_id'] ?? '',
             'validate_enabled' => (bool)($cfg['validate_enabled'] ?? false),
+            'send_enabled' => (bool)($cfg['send_enabled'] ?? false),
+            'send_client_id' => $cfg['send_client_id'] ?? '',
+            'message_template' => $cfg['message_template'] ?? (
+                <<<HTML
+<p>Halo {donor_name},</p>
+<p>Terima kasih atas niat baik Anda untuk berdonasi di kampanye "{campaign_title}".</p>
+<p>Nominal: Rp {amount}
+<br/>Referensi: {donation_reference}</p>
+<p>Silakan selesaikan pembayaran melalui tautan berikut:
+<br/>{pay_url}</p>
+<p>— {organization_name}</p>
+HTML
+            ),
         ]);
     }
 
@@ -64,11 +102,13 @@ class WaServiceSettings extends Page implements HasForms
                         Toggle::make('validate_enabled')
                             ->label('Aktifkan Validasi Nomor WA di Form Donasi')
                             ->inline(false),
-                        TextInput::make('validate_client_id')
+                        Select::make('validate_client_id')
                             ->label('Client ID untuk Validasi Nomor')
-                            ->placeholder('contoh: 6285xxxxxxxxxx')
-                            ->helperText('Client/nomor WA yang dipakai untuk memvalidasi nomor WA donatur.')
-                            ->maxLength(30),
+                            ->options(fn () => $this->accountOptions)
+                            ->searchable()
+                            ->preload()
+                            ->native(false)
+                            ->helperText('Pilih client/nomor WA untuk validasi nomor donatur.'),
                         Select::make('type_secret')
                             ->label('Tipe Secret')
                             ->options([
@@ -83,6 +123,28 @@ class WaServiceSettings extends Page implements HasForms
                             ->valueLabel('Header Value')
                             ->addButtonLabel('Tambah Header')
                             ->reorderable()
+                            ->columnSpanFull(),
+                    ]),
+                Section::make('Pengiriman Pesan')
+                    ->description('Atur pengiriman pesan WhatsApp otomatis dan templatenya')
+                    ->schema([
+                        Toggle::make('send_enabled')
+                            ->label('Aktifkan Kirim WhatsApp Otomatis')
+                            ->helperText('Jika aktif, sistem akan mengirim pesan WA ke donatur sesuai template.')
+                            ->inline(false),
+                        Select::make('send_client_id')
+                            ->label('Client ID untuk Kirim Pesan')
+                            ->options(fn () => $this->accountOptions)
+                            ->searchable()
+                            ->preload()
+                            ->native(false)
+                            ->helperText('Pilih client/nomor WA yang digunakan untuk mengirim pesan.'),
+                        RichEditor::make('message_template')
+                            ->label('Template Pesan')
+                            ->toolbarButtons([
+                                'bold', 'italic', 'strike', 'underline', 'link', 'bulletList', 'orderedList', 'blockquote', 'codeBlock', 'h2', 'h3'
+                            ])
+                            ->helperText('Gunakan placeholder: {donor_name}, {donor_phone}, {donor_email}, {amount}, {amount_raw}, {campaign_title}, {campaign_url}, {pay_url}, {donation_reference}, {organization_name}')
                             ->columnSpanFull(),
                     ]),
             ]);
@@ -109,6 +171,9 @@ class WaServiceSettings extends Page implements HasForms
             'headers' => $state['headers'] ?? [],
             'validate_client_id' => $state['validate_client_id'] ?? null,
             'validate_enabled' => (bool)($state['validate_enabled'] ?? false),
+            'send_enabled' => (bool)($state['send_enabled'] ?? false),
+            'send_client_id' => $state['send_client_id'] ?? null,
+            'message_template' => $state['message_template'] ?? null,
         ]);
 
         $org = $this->org ?? new Organization();

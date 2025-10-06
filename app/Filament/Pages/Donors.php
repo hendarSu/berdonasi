@@ -90,6 +90,39 @@ class Donors extends Page implements HasTable
         return [];
     }
 
+    protected function getTableActions(): array
+    {
+        return [
+            Tables\Actions\Action::make('detail')
+                ->label('Detail')
+                ->icon('heroicon-o-eye')
+                ->modalHeading('Detail Donatur')
+                ->modalCancelActionLabel('Tutup')
+                ->modalContent(function ($record) {
+                    $identity = (string) ($record->getAttribute('identity') ?? '');
+                    $identityExpr = "COALESCE(NULLIF(TRIM(donor_email), ''), NULLIF(TRIM(donor_phone), ''), NULLIF(TRIM(donor_name), ''))";
+
+                    $rows = Donation::query()
+                        ->select([
+                            'campaign_id',
+                            DB::raw('COUNT(*) as trx'),
+                            DB::raw("SUM(CASE WHEN status='paid' THEN amount ELSE 0 END) as total"),
+                            DB::raw('MAX(paid_at) as last_paid_at'),
+                        ])
+                        ->whereRaw($identityExpr . ' = ?', [$identity])
+                        ->groupBy('campaign_id')
+                        ->with(['campaign:id,title,slug'])
+                        ->orderByDesc(DB::raw('MAX(paid_at)'))
+                        ->get();
+
+                    return view('filament.pages.partials.donor-detail', [
+                        'identity' => $identity,
+                        'rows' => $rows,
+                    ]);
+                }),
+        ];
+    }
+
     protected function getTableEmptyStateHeading(): ?string
     {
         return 'Belum ada data donatur';

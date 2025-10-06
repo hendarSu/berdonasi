@@ -17,8 +17,7 @@
                             $tabBase = 'inline-block px-3 pt-4 pb-3 border-b-2 border-transparent text-gray-500 hover:text-sky-700';
                             $tabActive = 'inline-block px-3 pt-4 pb-3 border-b-2 border-sky-600 text-gray-900 font-semibold';
                         @endphp
-                        <a href="{{ route('program.index') }}" class="{{ request()->routeIs('program.*') ? $tabActive : $tabBase }}">Program</a>
-                        <a href="{{ route('news.index') }}" class="{{ request()->routeIs('news.*') ? $tabActive : $tabBase }}">Berita</a>
+                        @include('partials.menu-links', ['tabBase' => $tabBase, 'tabActive' => $tabActive])
                     </nav>
                 </div>
 

@@ -9,6 +9,7 @@ use App\Http\Controllers\CampaignArticleController;
 use App\Http\Controllers\MediaProxyController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\WaController;
+use App\Http\Controllers\DonationController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/campaigns/chunk', [HomeController::class, 'chunk'])->name('home.chunk');
@@ -21,7 +22,7 @@ Route::post('/campaign/{slug}/donasi', [CampaignController::class, 'donate'])->n
 Route::get('/laporan/{id}/{slug?}', [CampaignArticleController::class, 'show'])->name('article.show');
 Route::get('/media/{disk}', [MediaProxyController::class, 'show'])->name('media.proxy');
 
-Route::view('/donasi/{reference}/terima-kasih', 'donation.thanks')->name('donation.thanks');
+Route::get('/donasi/{reference}/terima-kasih', [DonationController::class, 'thanks'])->name('donation.thanks');
 
 // Pembayaran (Midtrans)
 Route::get('/donasi/{reference}/bayar', [PaymentController::class, 'pay'])->name('donation.pay');
@@ -37,5 +38,9 @@ Route::post('/wa/validate-number', [WaController::class, 'validateNumber'])
 
 // News (storefront)
 use App\Http\Controllers\NewsController;
+use App\Http\Controllers\PageController;
 Route::get('/berita', [NewsController::class, 'index'])->name('news.index');
 Route::get('/berita/{slug}', [NewsController::class, 'show'])->name('news.show');
+
+// Static Pages (storefront)
+Route::get('/p/{slug}', [PageController::class, 'show'])->name('page.show');

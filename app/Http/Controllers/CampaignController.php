@@ -115,6 +115,49 @@ class CampaignController extends Controller
             'created_at' => now(),
         ]);
 
+        // Optional: Send WA message after donation initiated (only once per donation)
+        try {
+            $svc = new WaService();
+            $cfg = $svc->getConfig();
+            if ((bool)($cfg['send_enabled'] ?? false) && ! empty($cfg['send_client_id'])) {
+                // Skip if already sent before (by any event)
+                $already = (bool) data_get($donation->meta_json, 'wa.sent');
+                if ($already) {
+                    // do nothing
+                } else {
+                $orgName = $campaign->organization?->name ?? config('app.name');
+                $vars = [
+                    'donor_name' => (string)($donation->donor_name ?? ''),
+                    'donor_phone' => (string)($donation->donor_phone ?? ''),
+                    'donor_email' => (string)($donation->donor_email ?? ''),
+                    'amount' => number_format((float)$donation->amount, 0, ',', '.'),
+                    'amount_raw' => (string)$donation->amount,
+                    'campaign_title' => (string)$campaign->title,
+                    'campaign_url' => route('campaign.show', $campaign->slug),
+                    'pay_url' => route('donation.pay', ['reference' => $donation->reference]),
+                    'donation_reference' => (string)$donation->reference,
+                    'organization_name' => (string)$orgName,
+                ];
+                $template = (string) ($cfg['message_template'] ?? '');
+                if ($template !== '' && ! empty($donation->donor_phone)) {
+                    $message = $svc->renderTemplate($template, $vars);
+                    $ok = $svc->sendText((string)$donation->donor_phone, $message);
+                    if ($ok) {
+                        $meta = $donation->meta_json ?? [];
+                        $meta['wa'] = ($meta['wa'] ?? []) + [
+                            'sent' => now()->toISOString(),
+                            'sent_event' => 'initiated',
+                        ];
+                        $donation->meta_json = $meta;
+                        $donation->save();
+                    }
+                }
+                }
+            }
+        } catch (\Throwable $e) {
+            // ignore WA failures silently
+        }
+
         return redirect()->route('donation.pay', ['reference' => $donation->reference]);
     }
 }

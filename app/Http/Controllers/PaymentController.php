@@ -12,6 +12,7 @@ use App\Models\WebhookEvent;
 use App\Services\Payments\MidtransService;
 use Illuminate\Http\Request;
 use App\Models\Organization;
+use App\Services\WaService;
 
 class PaymentController extends Controller
 {
@@ -159,6 +160,48 @@ class PaymentController extends Controller
                 // Update campaign raised_amount
                 $campaign->raised_amount = (float) $campaign->raised_amount + (float) $amount;
                 $campaign->save();
+            }
+
+            // Optionally send WA message on payment success (only once overall)
+            try {
+                $svc = new WaService();
+                $cfg = $svc->getConfig();
+                if ((bool)($cfg['send_enabled'] ?? false) && ! empty($cfg['send_client_id'])) {
+                    $orgName = $donation->campaign?->organization?->name ?? config('app.name');
+                    $vars = [
+                        'donor_name' => (string)($donation->donor_name ?? ''),
+                        'donor_phone' => (string)($donation->donor_phone ?? ''),
+                        'donor_email' => (string)($donation->donor_email ?? ''),
+                        'amount' => number_format((float)$donation->amount, 0, ',', '.'),
+                        'amount_raw' => (string)$donation->amount,
+                        'campaign_title' => (string)($donation->campaign?->title ?? ''),
+                        'campaign_url' => $donation->campaign ? route('campaign.show', $donation->campaign->slug) : '',
+                        'pay_url' => route('donation.pay', ['reference' => $donation->reference]),
+                        'donation_reference' => (string)$donation->reference,
+                        'organization_name' => (string)$orgName,
+                    ];
+                    $template = (string) ($cfg['message_template'] ?? '');
+                    if ($template !== '' && ! empty($donation->donor_phone)) {
+                        $already = (bool) (data_get($donation->meta_json, 'wa.sent')
+                                   || data_get($donation->meta_json, 'wa.sent_initiated')
+                                   || data_get($donation->meta_json, 'wa.sent_paid'));
+                        if (! $already) {
+                            $message = $svc->renderTemplate($template, $vars);
+                            $ok = $svc->sendText((string)$donation->donor_phone, $message);
+                            if ($ok) {
+                                $meta = $donation->meta_json ?? [];
+                                $meta['wa'] = ($meta['wa'] ?? []) + [
+                                    'sent' => now()->toISOString(),
+                                    'sent_event' => 'paid',
+                                ];
+                                $donation->meta_json = $meta;
+                                $donation->save();
+                            }
+                        }
+                    }
+                }
+            } catch (\Throwable $e) {
+                // ignore WA failures silently
             }
         }
 
