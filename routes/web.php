@@ -48,5 +48,3 @@ Route::get('/berita/{slug}', [NewsController::class, 'show'])->name('news.show')
 // Static Pages (storefront)
 Route::get('/p/{slug}', [PageController::class, 'show'])->name('page.show');
 
-// Allow custom HTML form submit to authenticate to the admin panel.
-Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
