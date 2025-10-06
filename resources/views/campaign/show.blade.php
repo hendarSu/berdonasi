@@ -335,8 +335,10 @@
             function openAt(i){
                 if (!items.length) return;
                 current = (i + items.length) % items.length;
-                imgEl.src = items[current].getAttribute('src');
-                imgEl.alt = items[current].getAttribute('alt') || 'Preview';
+                const el = items[current];
+                const chosen = (el.currentSrc && el.currentSrc !== '') ? el.currentSrc : el.getAttribute('src');
+                imgEl.src = chosen;
+                imgEl.alt = el.getAttribute('alt') || 'Preview';
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
                 document.body.classList.add('overflow-hidden');
