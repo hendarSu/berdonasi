@@ -44,3 +44,9 @@ Route::get('/berita/{slug}', [NewsController::class, 'show'])->name('news.show')
 
 // Static Pages (storefront)
 Route::get('/p/{slug}', [PageController::class, 'show'])->name('page.show');
+
+// Fallback for POST /admin/login (some proxies/browsers may POST empty body)
+// Redirect back to GET login page to avoid MethodNotAllowed.
+Route::post('/admin/login', function () {
+    return redirect('/admin/login');
+});
