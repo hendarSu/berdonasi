@@ -57,6 +57,17 @@ class OrganizationSettings extends Page implements HasForms
             'is_verified' => $this->org->is_verified ?? false,
             'meta_json' => isset($this->org->meta_json) ? json_encode($this->org->meta_json, JSON_PRETTY_PRINT) : null,
             'payments' => [
+                'enabled' => [
+                    'automatic' => (bool)($this->org->meta_json['payments']['enabled']['automatic'] ?? true),
+                    'manual' => (bool)($this->org->meta_json['payments']['enabled']['manual'] ?? true),
+                ],
+                'manual' => [
+                    'instructions' => $this->org->meta_json['payments']['manual']['instructions'] ?? null,
+                    'bank_name' => $this->org->meta_json['payments']['manual']['bank_name'] ?? null,
+                    'bank_account_name' => $this->org->meta_json['payments']['manual']['bank_account_name'] ?? null,
+                    'bank_account_number' => $this->org->meta_json['payments']['manual']['bank_account_number'] ?? null,
+                    'qr_path' => $this->org->meta_json['payments']['manual']['qr_path'] ?? null,
+                ],
                 'midtrans' => [
                     'is_production' => (bool)($this->org->meta_json['payments']['midtrans']['is_production'] ?? false),
                     'server_key' => $this->org->meta_json['payments']['midtrans']['server_key'] ?? null,
@@ -155,6 +166,43 @@ class OrganizationSettings extends Page implements HasForms
                 Section::make('Pembayaran')
                     ->columns(2)
                     ->schema([
+                        Fieldset::make('Metode Aktif')
+                            ->columns(2)
+                            ->schema([
+                                Toggle::make('payments.enabled.automatic')
+                                    ->label('Pembayaran Otomatis (Midtrans)')
+                                    ->helperText('Aktif/nonaktifkan pilihan pembayaran otomatis.')
+                                    ->inline(false),
+                                Toggle::make('payments.enabled.manual')
+                                    ->label('Pembayaran Manual (Transfer)')
+                                    ->helperText('Aktif/nonaktifkan pilihan pembayaran manual.')
+                                    ->inline(false),
+                            ])
+                            ->columnSpanFull(),
+                        Fieldset::make('Manual Payment (Transfer)')
+                            ->columns(2)
+                            ->schema([
+                                TextInput::make('payments.manual.bank_name')->label('Nama Bank')->maxLength(255),
+                                TextInput::make('payments.manual.bank_account_name')->label('Nama Pemilik Rekening')->maxLength(255),
+                                TextInput::make('payments.manual.bank_account_number')->label('Nomor Rekening')->maxLength(255),
+                                FileUpload::make('payments.manual.qr_path')
+                                    ->label('QRIS / QR Transfer (opsional)')
+                                    ->image()
+                                    ->disk('s3')
+                                    ->directory('manual-payments/qr')
+                                    ->visibility('private')
+                                    ->imageEditor()
+                                    ->imageResizeMode('contain')
+                                    ->imageResizeTargetWidth('1024')
+                                    ->imageResizeTargetHeight('1024')
+                                    ->columnSpanFull(),
+                                Textarea::make('payments.manual.instructions')
+                                    ->label('Instruksi Pembayaran Manual')
+                                    ->placeholder("Tulis instruksi transfer, contoh:\n1. Transfer ke rekening di atas.\n2. Upload bukti transfer pada halaman donasi Anda.")
+                                    ->rows(4)
+                                    ->columnSpanFull(),
+                            ])
+                            ->columnSpanFull(),
                         Fieldset::make('Midtrans')
                             ->columns(2)
                             ->schema([
@@ -253,6 +301,31 @@ class OrganizationSettings extends Page implements HasForms
                 'client_key' => $mt['client_key'] ?? null,
                 'merchant_id' => $mt['merchant_id'] ?? null,
             ]);
+        }
+        // Enabled methods
+        if (isset($state['payments']['enabled']) && is_array($state['payments']['enabled'])) {
+            $en = $state['payments']['enabled'];
+            if (! isset($meta['payments'])) {
+                $meta['payments'] = [];
+            }
+            $meta['payments']['enabled'] = [
+                'automatic' => (bool)($en['automatic'] ?? true),
+                'manual' => (bool)($en['manual'] ?? true),
+            ];
+        }
+        // Manual payment details
+        if (isset($state['payments']['manual']) && is_array($state['payments']['manual'])) {
+            $mp = $state['payments']['manual'];
+            if (! isset($meta['payments'])) {
+                $meta['payments'] = [];
+            }
+            $meta['payments']['manual'] = [
+                'instructions' => $mp['instructions'] ?? null,
+                'bank_name' => $mp['bank_name'] ?? null,
+                'bank_account_name' => $mp['bank_account_name'] ?? null,
+                'bank_account_number' => $mp['bank_account_number'] ?? null,
+                'qr_path' => $mp['qr_path'] ?? null,
+            ];
         }
         // Analytics
         if (isset($state['analytics']) && is_array($state['analytics'])) {

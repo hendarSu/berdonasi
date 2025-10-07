@@ -59,6 +59,31 @@
                     <label class="mb-1 block text-sm text-gray-700">Doa Terbaik</label>
                     <input type="text" name="message" class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400" />
                 </div>
+                <div>
+                    <label class="mb-2 block text-sm text-gray-700">Metode Pembayaran</label>
+                    <div class="grid grid-cols-1 gap-3"> <!-- force 2 rows (1 col) -->
+                        @php
+                            $defaultAutomatic = isset($automaticEnabled) ? (bool)$automaticEnabled : true;
+                            $defaultManual = isset($manualEnabled) ? (bool)$manualEnabled : true;
+                            $defaultChoice = $defaultAutomatic ? 'automatic' : ($defaultManual ? 'manual' : null);
+                        @endphp
+                        @if ($automaticEnabled ?? true)
+                        <label class="flex items-center gap-3 rounded-lg border-2 border-gray-200 bg-white px-4 py-3 text-base shadow-sm hover:border-sky-300">
+                            <input type="radio" name="payment_type" value="automatic" {{ ($defaultChoice === 'automatic') ? 'checked' : '' }} class="h-5 w-5 text-sky-600 focus:ring-sky-500" />
+                            <span class="font-medium">Otomatis (Midtrans)</span>
+                        </label>
+                        @endif
+                        @if ($manualEnabled ?? true)
+                        <label class="flex items-center gap-3 rounded-lg border-2 border-gray-200 bg-white px-4 py-3 text-base shadow-sm hover:border-sky-300">
+                            <input type="radio" name="payment_type" value="manual" {{ ($defaultChoice === 'manual') ? 'checked' : '' }} class="h-5 w-5 text-sky-600 focus:ring-sky-500" />
+                            <span class="font-medium">Manual (Transfer)</span>
+                        </label>
+                        @endif
+                    </div>
+                    @if (!(($automaticEnabled ?? true) || ($manualEnabled ?? true)))
+                        <div class="mt-2 rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">Metode pembayaran tidak tersedia. Hubungi administrator.</div>
+                    @endif
+                </div>
                 <div class="mt-3 relative" id="submit-wrapper">
                     <button id="submit-btn" type="submit" class="w-full inline-flex items-center justify-center rounded-md bg-orange-500 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-orange-600">Lanjutkan Pembayaran</button>
                     <div id="wa-block-overlay" class="hidden absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center text-sm text-gray-700 rounded-md" style="

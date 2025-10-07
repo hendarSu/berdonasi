@@ -29,6 +29,10 @@ Route::get('/donasi/{reference}/terima-kasih', [DonationController::class, 'than
 Route::get('/donasi/{reference}/bayar', [PaymentController::class, 'pay'])->name('donation.pay');
 Route::post('/midtrans/notify', [PaymentController::class, 'notify'])->name('midtrans.notify');
 
+// Pembayaran Manual
+Route::get('/donasi/{reference}/manual', [PaymentController::class, 'manual'])->name('donation.manual');
+Route::post('/donasi/{reference}/manual', [PaymentController::class, 'submitManual'])->name('donation.manual.submit');
+
 // Donor CRM (public simple listing)
 Route::get('/donatur', [DonorController::class, 'index'])->name('donor.index');
 
