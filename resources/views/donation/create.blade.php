@@ -110,7 +110,7 @@
                             <input class="peer sr-only midtrans-method-radio" type="radio" name="payment_method" value="{{ $m['id'] }}" data-name="{{ $m['name'] }}" data-fee-type="{{ $m['fee_type'] }}" data-fee-value="{{ $m['fee_value'] }}" {{ ($defaultChoice === 'automatic' && $idx === 0) ? 'required' : '' }}>
                             <div class="method-card flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3 hover:border-sky-300 peer-checked:border-sky-500 peer-checked:border-2 peer-checked:ring-2 peer-checked:ring-sky-100 peer-checked:bg-sky-50 transition">
                                 <div class="flex items-center gap-3 min-w-0">
-                                    <img src="{{ $m['logo'] }}" alt="" class="h-7 w-7 rounded object-contain bg-white" />
+                                    <img src="{{ $m['logo'] }}" alt="" class="w-10 rounded object-contain bg-white" />
                                     <div class="min-w-0">
                                         <div class="text-sm font-medium text-gray-900 truncate">{{ $m['name'] }}</div>
                                         <div class="text-xs text-gray-500">{{ (new \App\Services\Payments\PaymentMethodCatalog())->feeText($m) }}</div>

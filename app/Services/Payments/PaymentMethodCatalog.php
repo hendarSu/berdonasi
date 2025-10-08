@@ -18,28 +18,28 @@ class PaymentMethodCatalog
         return [
             'bca_va' => [
                 'name' => 'BCA Virtual Account',
-                'logo' => asset('images/payments/bca.svg'),
+                'logo' => asset('images/payments/bca.png'),
                 'fee'  => ['type' => 'flat', 'value' => 4000],
             ],
             'bri_va' => [
                 'name' => 'BRI Virtual Account',
-                'logo' => asset('images/payments/bri.svg'),
+                'logo' => asset('images/payments/bri.png'),
                 'fee'  => ['type' => 'flat', 'value' => 4000],
             ],
             'qris' => [
                 'name' => 'QRIS',
-                'logo' => asset('images/payments/qris.svg'),
+                'logo' => asset('images/payments/qris.png'),
                 'fee'  => ['type' => 'percent', 'value' => 0.7],
             ],
             'bni_va' => [
                 'name' => 'BNI Virtual Account',
-                'logo' => asset('images/payments/bni.svg'),
+                'logo' => asset('images/payments/bni.png'),
                 'fee'  => ['type' => 'flat', 'value' => 4000],
             ],
             // Midtrans uses 'echannel' for Mandiri Bill Payment
             'echannel' => [
                 'name' => 'Mandiri Bill Payment',
-                'logo' => asset('images/payments/mandiri.svg'),
+                'logo' => asset('images/payments/mandiri.png'),
                 'fee'  => ['type' => 'flat', 'value' => 4000],
             ],
         ];
