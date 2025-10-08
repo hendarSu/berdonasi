@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Campaign;
 use App\Models\CampaignArticle;
 use App\Models\Donation;
+use App\Services\Payments\PaymentMethodCatalog;
+use Illuminate\Validation\Rule;
 use App\Services\WaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -25,11 +27,18 @@ class CampaignController extends Controller
         $automaticEnabled = (bool) data_get($meta, 'payments.enabled.automatic', true);
         $manualEnabled = (bool) data_get($meta, 'payments.enabled.manual', true);
 
+        // Load active Midtrans methods for inline selection on the form
+        $midtransMethods = [];
+        if ($automaticEnabled) {
+            $midtransMethods = (new PaymentMethodCatalog())->activeMidtrans();
+        }
+
         return view('donation.create', [
             'c' => $campaign,
             'waValidationEnabled' => $waValidationEnabled,
             'automaticEnabled' => $automaticEnabled,
             'manualEnabled' => $manualEnabled,
+            'midtransMethods' => $midtransMethods,
         ]);
     }
 
@@ -85,6 +94,10 @@ class CampaignController extends Controller
     {
         $campaign = Campaign::query()->where('slug', $slug)->firstOrFail();
 
+        // Prepare allowed midtrans method codes for validation
+        $allowedMethodIds = (new PaymentMethodCatalog())->activeMidtrans();
+        $allowedMethodIds = collect($allowedMethodIds)->pluck('id')->all();
+
         $data = $request->validate([
             'amount' => ['required', 'numeric', 'min:1000'],
             'donor_name' => ['required', 'string', 'max:255'],
@@ -93,6 +106,7 @@ class CampaignController extends Controller
             'is_anonymous' => ['sometimes', 'boolean'],
             'message' => ['nullable', 'string', 'max:255'],
             'payment_type' => ['nullable', 'in:automatic,manual'],
+            'payment_method' => ['nullable', 'string', 'required_if:payment_type,automatic', Rule::in($allowedMethodIds)],
         ]);
 
         // Optional WA number validation (server-side)
@@ -136,6 +150,11 @@ class CampaignController extends Controller
         // Persist selected payment type to meta_json for traceability
         $meta = $donation->meta_json ?? [];
         $meta['payment_type'] = $requestedType;
+        if ($requestedType === 'automatic' && ! empty($data['payment_method'] ?? null)) {
+            $meta['midtrans'] = ($meta['midtrans'] ?? []) + [
+                'chosen_method' => (string) $data['payment_method'],
+            ];
+        }
         $donation->meta_json = $meta;
         $donation->save();
 
@@ -192,6 +211,7 @@ class CampaignController extends Controller
         if ($paymentType === 'manual') {
             return redirect()->route('donation.manual', ['reference' => $donation->reference]);
         }
+        // For automatic (Midtrans), we already have a chosen method on the form
         return redirect()->route('donation.pay', ['reference' => $donation->reference]);
     }
 }

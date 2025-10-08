@@ -27,6 +27,9 @@ Route::get('/donasi/{reference}/terima-kasih', [DonationController::class, 'than
 
 // Pembayaran (Midtrans)
 Route::get('/donasi/{reference}/bayar', [PaymentController::class, 'pay'])->name('donation.pay');
+// Pilih metode Midtrans (VA/QRIS)
+Route::get('/donasi/{reference}/metode', [PaymentController::class, 'methods'])->name('donation.methods');
+Route::post('/donasi/{reference}/metode', [PaymentController::class, 'choose'])->name('donation.choose.method');
 Route::post('/midtrans/notify', [PaymentController::class, 'notify'])->name('midtrans.notify');
 
 // Pembayaran Manual
