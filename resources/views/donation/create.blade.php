@@ -22,7 +22,7 @@
         }
     </style>
 </head>
-<body class="bg-white sm:bg-gray-50 text-gray-900">
+<body class="bg-white text-gray-900">
     <header class="bg-white border-b border-gray-200">
         <div class="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between gap-4">
             <a href="{{ route('campaign.show', $c->slug) }}" class="text-sky-600 hover:text-sky-700">← Kembali</a>
