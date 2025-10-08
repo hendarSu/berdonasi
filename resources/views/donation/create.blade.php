@@ -94,7 +94,7 @@
                         @if ($manualEnabled ?? true)
                         <label class="flex items-center gap-3 rounded-md border border-gray-200 bg-white px-4 py-3 text-base  hover:border-sky-300">
                             <input id="paytype-manual" type="radio" name="payment_type" value="manual" {{ ($defaultChoice === 'manual') ? 'checked' : '' }} class="h-5 w-5 text-sky-600 focus:ring-sky-500" />
-                            <span class="font-medium">Manual/Transfer</span>
+                            <span class="font-medium">Manual Transfer</span>
                         </label>
                         @endif
                     </div>
