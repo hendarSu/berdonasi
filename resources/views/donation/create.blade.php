@@ -78,7 +78,7 @@
                     <input type="text" name="message" class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400" />
                 </div>
                 <div>
-                    <label class="mb-2 block text-sm text-gray-700">Metode Pembayaran</label>
+                    <label class="mb-2 block text-sm text-gray-700">Jenis Pembayaran</label>
                     <div class="grid grid-cols-1 gap-3"> <!-- force 2 rows (1 col) -->
                         @php
                             $defaultAutomatic = isset($automaticEnabled) ? (bool)$automaticEnabled : true;
@@ -88,13 +88,13 @@
                         @if ($automaticEnabled ?? true)
                         <label class="flex items-center gap-3 rounded-md border border-gray-200 bg-white px-4 py-3 text-base  hover:border-sky-300">
                             <input id="paytype-automatic" type="radio" name="payment_type" value="automatic" {{ ($defaultChoice === 'automatic') ? 'checked' : '' }} class="h-5 w-5 text-sky-600 focus:ring-sky-500" />
-                            <span class="font-medium">Otomatis (Midtrans)</span>
+                            <span class="font-medium">Otomatis</span>
                         </label>
                         @endif
                         @if ($manualEnabled ?? true)
                         <label class="flex items-center gap-3 rounded-md border border-gray-200 bg-white px-4 py-3 text-base  hover:border-sky-300">
                             <input id="paytype-manual" type="radio" name="payment_type" value="manual" {{ ($defaultChoice === 'manual') ? 'checked' : '' }} class="h-5 w-5 text-sky-600 focus:ring-sky-500" />
-                            <span class="font-medium">Manual (Transfer)</span>
+                            <span class="font-medium">Manual/Transfer</span>
                         </label>
                         @endif
                     </div>
@@ -105,7 +105,7 @@
 
                 @if (!empty($midtransMethods))
                 <div id="midtrans-methods" class="mt-2 {{ ($defaultChoice === 'automatic') ? '' : 'hidden' }}">
-                    <div class="mb-2 text-sm text-gray-700">Pilih Metode Midtrans:</div>
+                    <div class="mb-2 text-sm text-gray-700">Pilih Metode Pemabayaran</div>
                     <div class="space-y-3">
                         @foreach ($midtransMethods as $idx => $m)
                         <label class="block">
