@@ -14,6 +14,11 @@ class Payment extends Model
         'payment_method_id',
         'provider_txn_id',
         'provider_status',
+        'manual_status',
+        'manual_proof_path',
+        'manual_note',
+        'manual_reviewed_by',
+        'manual_reviewed_at',
         'gross_amount',
         'fee_amount',
         'net_amount',
@@ -25,6 +30,7 @@ class Payment extends Model
         'gross_amount' => 'decimal:2',
         'fee_amount' => 'decimal:2',
         'net_amount' => 'decimal:2',
+        'manual_reviewed_at' => 'datetime',
         'payload_req_json' => 'array',
         'payload_res_json' => 'array',
     ];
@@ -39,4 +45,3 @@ class Payment extends Model
         return $this->belongsTo(PaymentMethod::class, 'payment_method_id');
     }
 }
-

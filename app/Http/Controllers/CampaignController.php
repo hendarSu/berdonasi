@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Campaign;
 use App\Models\CampaignArticle;
 use App\Models\Donation;
+use App\Services\Payments\PaymentMethodCatalog;
+use Illuminate\Validation\Rule;
 use App\Services\WaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -21,9 +23,22 @@ class CampaignController extends Controller
         $waCfg = (new WaService())->getConfig();
         $waValidationEnabled = (bool)($waCfg['validate_enabled'] ?? false) && !empty($waCfg['validate_client_id']);
 
+        $meta = $campaign->organization?->meta_json ?? [];
+        $automaticEnabled = (bool) data_get($meta, 'payments.enabled.automatic', true);
+        $manualEnabled = (bool) data_get($meta, 'payments.enabled.manual', true);
+
+        // Load active Midtrans methods for inline selection on the form
+        $midtransMethods = [];
+        if ($automaticEnabled) {
+            $midtransMethods = (new PaymentMethodCatalog())->activeMidtrans();
+        }
+
         return view('donation.create', [
             'c' => $campaign,
             'waValidationEnabled' => $waValidationEnabled,
+            'automaticEnabled' => $automaticEnabled,
+            'manualEnabled' => $manualEnabled,
+            'midtransMethods' => $midtransMethods,
         ]);
     }
 
@@ -79,6 +94,10 @@ class CampaignController extends Controller
     {
         $campaign = Campaign::query()->where('slug', $slug)->firstOrFail();
 
+        // Prepare allowed midtrans method codes for validation
+        $allowedMethodIds = (new PaymentMethodCatalog())->activeMidtrans();
+        $allowedMethodIds = collect($allowedMethodIds)->pluck('id')->all();
+
         $data = $request->validate([
             'amount' => ['required', 'numeric', 'min:1000'],
             'donor_name' => ['required', 'string', 'max:255'],
@@ -86,6 +105,8 @@ class CampaignController extends Controller
             'donor_email' => ['nullable', 'email', 'max:255'],
             'is_anonymous' => ['sometimes', 'boolean'],
             'message' => ['nullable', 'string', 'max:255'],
+            'payment_type' => ['nullable', 'in:automatic,manual'],
+            'payment_method' => ['nullable', 'string', 'required_if:payment_type,automatic', Rule::in($allowedMethodIds)],
         ]);
 
         // Optional WA number validation (server-side)
@@ -99,6 +120,17 @@ class CampaignController extends Controller
         }
 
         $ref = 'DN-' . now()->format('Ymd-His') . '-' . Str::upper(Str::random(6));
+
+        // Determine allowed payment types from org settings
+        $meta = $campaign->organization?->meta_json ?? [];
+        $automaticEnabled = (bool) data_get($meta, 'payments.enabled.automatic', true);
+        $manualEnabled = (bool) data_get($meta, 'payments.enabled.manual', true);
+        $requestedType = $data['payment_type'] ?? 'automatic';
+        if ($requestedType === 'automatic' && ! $automaticEnabled && $manualEnabled) {
+            $requestedType = 'manual';
+        } elseif ($requestedType === 'manual' && ! $manualEnabled && $automaticEnabled) {
+            $requestedType = 'automatic';
+        }
 
         $donation = Donation::create([
             'campaign_id' => $campaign->id,
@@ -115,6 +147,17 @@ class CampaignController extends Controller
             'created_at' => now(),
         ]);
 
+        // Persist selected payment type to meta_json for traceability
+        $meta = $donation->meta_json ?? [];
+        $meta['payment_type'] = $requestedType;
+        if ($requestedType === 'automatic' && ! empty($data['payment_method'] ?? null)) {
+            $meta['midtrans'] = ($meta['midtrans'] ?? []) + [
+                'chosen_method' => (string) $data['payment_method'],
+            ];
+        }
+        $donation->meta_json = $meta;
+        $donation->save();
+
         // Optional: Send WA message after donation initiated (only once per donation)
         try {
             $svc = new WaService();
@@ -126,6 +169,10 @@ class CampaignController extends Controller
                     // do nothing
                 } else {
                 $orgName = $campaign->organization?->name ?? config('app.name');
+                $payUrl = route('donation.pay', ['reference' => $donation->reference]);
+                if (($requestedType ?? null) === 'manual') {
+                    $payUrl = route('donation.manual', ['reference' => $donation->reference]);
+                }
                 $vars = [
                     'donor_name' => (string)($donation->donor_name ?? ''),
                     'donor_phone' => (string)($donation->donor_phone ?? ''),
@@ -134,11 +181,12 @@ class CampaignController extends Controller
                     'amount_raw' => (string)$donation->amount,
                     'campaign_title' => (string)$campaign->title,
                     'campaign_url' => route('campaign.show', $campaign->slug),
-                    'pay_url' => route('donation.pay', ['reference' => $donation->reference]),
+                    'pay_url' => $payUrl,
                     'donation_reference' => (string)$donation->reference,
                     'organization_name' => (string)$orgName,
                 ];
-                $template = (string) ($cfg['message_template'] ?? '');
+                // Use initiated/unpaid template
+                $template = (string) ($cfg['message_template_initiated'] ?? ($cfg['message_template'] ?? ''));
                 if ($template !== '' && ! empty($donation->donor_phone)) {
                     $message = $svc->renderTemplate($template, $vars);
                     $ok = $svc->sendText((string)$donation->donor_phone, $message);
@@ -158,6 +206,12 @@ class CampaignController extends Controller
             // ignore WA failures silently
         }
 
+        // Route based on selected payment type
+        $paymentType = $requestedType;
+        if ($paymentType === 'manual') {
+            return redirect()->route('donation.manual', ['reference' => $donation->reference]);
+        }
+        // For automatic (Midtrans), we already have a chosen method on the form
         return redirect()->route('donation.pay', ['reference' => $donation->reference]);
     }
 }

@@ -22,7 +22,10 @@ class WaService
             'validate_enabled' => (bool)($cfg['validate_enabled'] ?? false),
             'send_enabled' => (bool)($cfg['send_enabled'] ?? false),
             'send_client_id' => (string)($cfg['send_client_id'] ?? ''),
+            // Backward comp: keep legacy key and provide split templates
             'message_template' => (string)($cfg['message_template'] ?? ''),
+            'message_template_initiated' => (string)($cfg['message_template_initiated'] ?? ($cfg['message_template'] ?? '')),
+            'message_template_paid' => (string)($cfg['message_template_paid'] ?? ''),
             'send_max_attempts' => (int)($cfg['send_max_attempts'] ?? 8),
         ];
     }

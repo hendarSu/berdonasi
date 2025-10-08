@@ -72,7 +72,7 @@ class WaServiceSettings extends Page implements HasForms
             'validate_enabled' => (bool)($cfg['validate_enabled'] ?? false),
             'send_enabled' => (bool)($cfg['send_enabled'] ?? false),
             'send_client_id' => $cfg['send_client_id'] ?? '',
-            'message_template' => $cfg['message_template'] ?? (
+            'message_template_initiated' => $cfg['message_template_initiated'] ?? ($cfg['message_template'] ?? (
                 <<<HTML
 <p>Halo {donor_name},</p>
 <p>Terima kasih atas niat baik Anda untuk berdonasi di program "{campaign_title}".</p>
@@ -80,6 +80,18 @@ class WaServiceSettings extends Page implements HasForms
 <br/>Referensi: {donation_reference}</p>
 <p>Silakan selesaikan pembayaran melalui tautan berikut:
 <br/>{pay_url}</p>
+<p>— {organization_name}</p>
+HTML
+            )),
+            'message_template_paid' => $cfg['message_template_paid'] ?? (
+                <<<HTML
+<p>Alhamdulillah, pembayaran donasi Anda <strong>berhasil</strong> 🙏</p>
+<p>Program: "{campaign_title}"
+<br/>Nominal: Rp {amount}
+<br/>Referensi: {donation_reference}</p>
+<p>Terima kasih {donor_name} atas dukungannya. Semoga menjadi amal jariyah dan berkah.</p>
+<p>Detail program:
+<br/>{campaign_url}</p>
 <p>— {organization_name}</p>
 HTML
             ),
@@ -139,12 +151,19 @@ HTML
                             ->preload()
                             ->native(false)
                             ->helperText('Pilih client/nomor WA yang digunakan untuk mengirim pesan.'),
-                        RichEditor::make('message_template')
-                            ->label('Template Pesan')
+                        RichEditor::make('message_template_initiated')
+                            ->label('Template Pesan (Inisiasi/Belum Lunas)')
                             ->toolbarButtons([
                                 'bold', 'italic', 'strike', 'underline', 'link', 'bulletList', 'orderedList', 'blockquote', 'codeBlock', 'h2', 'h3'
                             ])
                             ->helperText('Gunakan placeholder: {donor_name}, {donor_phone}, {donor_email}, {amount}, {amount_raw}, {campaign_title}, {campaign_url}, {pay_url}, {donation_reference}, {organization_name}')
+                            ->columnSpanFull(),
+                        RichEditor::make('message_template_paid')
+                            ->label('Template Pesan (Pembayaran Berhasil)')
+                            ->toolbarButtons([
+                                'bold', 'italic', 'strike', 'underline', 'link', 'bulletList', 'orderedList', 'blockquote', 'codeBlock', 'h2', 'h3'
+                            ])
+                            ->helperText('Gunakan placeholder yang sama. Contoh: berikan ucapan terima kasih dan tautan ke {campaign_url}.')
                             ->columnSpanFull(),
                     ]),
             ]);
@@ -173,7 +192,10 @@ HTML
             'validate_enabled' => (bool)($state['validate_enabled'] ?? false),
             'send_enabled' => (bool)($state['send_enabled'] ?? false),
             'send_client_id' => $state['send_client_id'] ?? null,
-            'message_template' => $state['message_template'] ?? null,
+            // Keep legacy key for backward compatibility, mirror initiated
+            'message_template' => $state['message_template_initiated'] ?? null,
+            'message_template_initiated' => $state['message_template_initiated'] ?? null,
+            'message_template_paid' => $state['message_template_paid'] ?? null,
         ]);
 
         $org = $this->org ?? new Organization();

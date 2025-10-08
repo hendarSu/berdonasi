@@ -55,28 +55,33 @@ class MidtransService
             : 'https://app.sandbox.midtrans.com/snap/v1';
     }
 
-    public function createSnapTransaction(Donation $donation): array
+    public function createSnapTransaction(Donation $donation, array $options = []): array
     {
         $campaign = $donation->campaign()->first();
         $orderId = $donation->reference;
-        // Ensure integer rupiah value and use same number for item_details
-        $itemPrice = max(1, (int) round((float) $donation->amount));
-        $qty = 1;
-        $grossAmount = $itemPrice * $qty;
+        // Ensure integer rupiah value
+        $baseAmount = max(1, (int) round((float) $donation->amount));
+        $overrideGross = $options['override_gross'] ?? null;
+        $grossAmount = $overrideGross ? max(1, (int) round((float) $overrideGross)) : $baseAmount;
         // Midtrans item name limit is 50 chars
         $itemName = Str::limit('Donasi: ' . ($campaign?->title ?? 'Campaign'), 50, '');
+
+        $itemDetails = $options['item_details'] ?? null;
+        if (!is_array($itemDetails) || empty($itemDetails)) {
+            $itemDetails = [[
+                'id' => 'donation',
+                'price' => $baseAmount,
+                'quantity' => 1,
+                'name' => $itemName,
+            ]];
+        }
 
         $payload = [
             'transaction_details' => [
                 'order_id' => $orderId,
                 'gross_amount' => $grossAmount,
             ],
-            'item_details' => [[
-                'id' => 'donation',
-                'price' => $itemPrice,
-                'quantity' => $qty,
-                'name' => $itemName,
-            ]],
+            'item_details' => $itemDetails,
             'customer_details' => [
                 'first_name' => $donation->donor_name ?: 'Donatur',
                 'email' => $donation->donor_email ?: 'donatur@example.test',
@@ -89,6 +94,15 @@ class MidtransService
                 'secure' => true,
             ],
         ];
+
+        // Allow narrowing to a specific payment method (e.g. 'bca_va', 'qris')
+        $enabled = $options['enabled_payments'] ?? null;
+        if (is_string($enabled) && $enabled !== '') {
+            $enabled = [$enabled];
+        }
+        if (is_array($enabled) && ! empty($enabled)) {
+            $payload['enabled_payments'] = array_values($enabled);
+        }
 
         $response = Http::withBasicAuth($this->serverKey(), '')
             ->withHeaders([
