@@ -6,7 +6,7 @@
     <title>Pilih Metode — {{ env('APP_NAME') }}</title>
     @vite(['resources/css/app.css','resources/js/app.js'])
 </head>
-<body class="bg-gray-50 text-gray-900">
+<body class="bg-white text-gray-900">
     <main class="mx-auto max-w-2xl px-4 py-8">
         <h1 class="text-xl font-semibold">Metode Pembayaran</h1>
         <p class="mt-1 text-sm text-gray-600">Referensi: <span class="font-mono">{{ $donation->reference }}</span></p>

@@ -5,7 +5,7 @@
     @else
         <div class="overflow-hidden rounded-md border border-gray-200">
             <table class="min-w-full divide-y divide-gray-200 text-sm">
-                <thead class="bg-gray-50">
+                <thead class="bg-white">
                     <tr>
                         <th class="px-3 py-2 text-left font-medium text-gray-700">Campaign</th>
                         <th class="px-3 py-2 text-right font-medium text-gray-700">Transaksi</th>

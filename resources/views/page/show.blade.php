@@ -33,7 +33,7 @@
         .prose figure { margin-top: 1.25rem; margin-bottom: 1.25rem; }
     </style>
   </head>
-  <body class="bg-gray-50 text-gray-900">
+  <body class="bg-white text-gray-900">
     <header class="bg-white border-b border-gray-200">
         <div class="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between gap-4">
             <a href="{{ route('home') }}" class="text-sky-600 hover:text-sky-700">← Beranda</a>
@@ -46,10 +46,10 @@
             </nav>
         </div>
     </header>
-    <main class="mx-auto max-w-3xl px-4 py-8">
+    <main class="mx-auto max-w-7xl px-4 py-8">
         <article class="space-y-4">
             <h1 class="text-2xl font-bold">{{ $p->title }}</h1>
-            <div class="prose max-w-none bg-white p-5 rounded-md shadow">
+            <div class="prose max-w-none bg-white">
                 {!! $p->body_html !!}
             </div>
         </article>

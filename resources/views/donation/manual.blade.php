@@ -8,7 +8,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="bg-gray-50 text-gray-900">
+<body class="bg-white text-gray-900">
     <main class="mx-auto max-w-2xl px-4 py-8">
         <div class="rounded-xl bg-white p-5 shadow">
             <h1 class="mb-1 text-xl font-semibold">Pembayaran Manual (Transfer)</h1>

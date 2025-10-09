@@ -31,7 +31,7 @@
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
     </head>
-<body class="bg-gray-50 text-gray-900">
+<body class="bg-white text-gray-900">
     <main class="mx-auto flex min-h-screen max-w-2xl items-center justify-center px-4">
         <div class="w-full rounded-xl bg-white p-8 text-center shadow">
             <div class="mx-auto mb-4 spinner"></div>

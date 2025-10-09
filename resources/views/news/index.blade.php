@@ -6,7 +6,7 @@
     <title>Berita — {{ env('APP_NAME') }}</title>
     @vite(['resources/css/app.css','resources/js/app.js'])
 </head>
-<body class="bg-gray-50 text-gray-900">
+<body class="bg-white text-gray-900">
     <header class="bg-white border-b border-gray-200">
         <div class="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between gap-4">
             <a href="{{ route('home') }}" class="text-sky-600 hover:text-sky-700">← Beranda</a>

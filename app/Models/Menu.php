@@ -15,5 +15,11 @@ class Menu extends Model
     {
         return $this->hasMany(MenuItem::class)->orderBy('sort_order');
     }
-}
 
+    public function topItems()
+    {
+        return $this->hasMany(MenuItem::class)
+            ->whereNull('parent_id')
+            ->orderBy('sort_order');
+    }
+}

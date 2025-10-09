@@ -81,7 +81,7 @@
     </style>
 </head>
 
-<body class="bg-gray-50 text-gray-900">
+<body class="bg-white text-gray-900">
     @if (!empty($gtmId))
         <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ $gtmId }}" height="0" width="0"
                     style="display:none;visibility:hidden"></iframe></noscript>
@@ -144,7 +144,7 @@
 
                     <!-- Tabs -->
                     @php $activeTab = $tab ?? 'detail'; @endphp
-                    <div class="bg-white shadow mb-5" style="margin-bottom: 50px !important;margin-top: -15px;">
+                    <div class="bg-white mb-5" style="margin-bottom: 50px !important;margin-top: -15px;">
                         <div class="border-b border-gray-200">
                             <nav class="flex overflow-x-auto" aria-label="Tabs">
                                 @php
@@ -230,7 +230,7 @@
                                 @if ($donations->count() === 0)
                                     <p class="text-gray-600">Belum ada donatur.</p>
                                 @else
-                                    <ul class="divide-y divide-gray-100 rounded-lg border border-gray-200 bg-white">
+                                    <ul class="divide-y divide-gray-100 bg-white">
                                         @foreach ($donations as $d)
                                             @php
                                                 $displayName = $d->is_anonymous ? 'Hamba Allah' : ($d->donor_name ?: '—');
@@ -245,7 +245,7 @@
                                                 }
                                                 $initials = mb_strtoupper($initials ?: 'NA');
                                             @endphp
-                                            <li class="flex items-center gap-3 px-4 py-3">
+                                            <li class="flex items-center gap-3 py-3">
                                                 <div
                                                      class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-semibold text-gray-700">
                                                     {{ $initials }}</div>
@@ -326,7 +326,7 @@
         $encUrlFab = urlencode($shareUrlFab);
         $encTextFab = urlencode($shareTextFab);
     @endphp
-    <div class="fixed inset-x-0 bottom-0 z-30 bg-white backdrop-blur border-t border-gray-200">
+    <div id="fab-share-bar" class="fixed inset-x-0 bottom-0 z-30 bg-white backdrop-blur border-t border-gray-200 transform transition-all duration-200 ease-out translate-y-full opacity-0 pointer-events-none">
         <div class="mx-auto max-w-7xl px-4 py-3 flex items-center gap-3">
             <button type="button" id="fab-share-trigger"
                     class="inline-flex items-center justify-center rounded-md border border-orange-500 bg-white px-4 py-2.5 text-sm font-semibold text-orange-600 shadow-sm hover:bg-orange-50"
@@ -481,6 +481,22 @@
             closePop();
         });
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePop(); });
+
+        // Show bottom bar only after scrolling down a bit
+        (function () {
+            const bar = document.getElementById('fab-share-bar');
+            if (!bar) return;
+            const update = () => {
+                const y = window.scrollY || window.pageYOffset || 0;
+                if (y > 200) {
+                    bar.classList.remove('translate-y-full', 'opacity-0', 'pointer-events-none');
+                } else {
+                    bar.classList.add('translate-y-full', 'opacity-0', 'pointer-events-none');
+                }
+            };
+            update();
+            window.addEventListener('scroll', update, { passive: true });
+        })();
     </script>
 </body>
 

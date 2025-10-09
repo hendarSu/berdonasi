@@ -10,7 +10,7 @@ class MenuItem extends Model
     use HasFactory;
 
     protected $fillable = [
-        'menu_id', 'parent_id', 'title', 'url', 'page_id', 'sort_order', 'active',
+        'menu_id', 'parent_id', 'title', 'url', 'page_id', 'news_id', 'campaign_id', 'type', 'sort_order', 'active',
     ];
 
     public function menu()
@@ -32,5 +32,14 @@ class MenuItem extends Model
     {
         return $this->belongsTo(Page::class);
     }
-}
 
+    public function news()
+    {
+        return $this->belongsTo(News::class, 'news_id');
+    }
+
+    public function campaign()
+    {
+        return $this->belongsTo(Campaign::class, 'campaign_id');
+    }
+}

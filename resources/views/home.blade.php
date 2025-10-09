@@ -112,13 +112,7 @@
         <!-- Mobile Navigation Menu -->
         <div id="mobile-menu" class="hidden lg:hidden border-t border-gray-200">
             <div class="px-4 py-3 space-y-1">
-                @php
-                    $mobileTabBase = 'block px-4 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors';
-                    $mobileTabActive = 'block px-4 py-3 text-sm font-semibold text-gray-900 bg-gray-50 rounded-lg';
-                @endphp
-                <a href="{{ route('news.index') }}" class="{{ request()->routeIs('news.index') ? $mobileTabActive : $mobileTabBase }}">
-                    Berita
-                </a>
+                @include('partials.menu-links-mobile')
             </div>
 
             <!-- Mobile Search -->

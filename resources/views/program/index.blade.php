@@ -8,20 +8,15 @@
 </head>
 <body class="bg-white text-gray-900">
     <header class="bg-white border-b border-gray-200">
-        <div class="mx-auto max-w-7xl px-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-6">
-                    <a href="{{ route('home') }}" class="shrink-0 py-3 text-sky-700 font-bold">{{ env('APP_NAME') }}</a>
-                    <nav class="hidden md:flex items-center gap-2 text-sm">
-                        @php
-                            $tabBase = 'inline-block px-3 pt-4 pb-3 border-b-2 border-transparent text-gray-500 hover:text-sky-700';
-                            $tabActive = 'inline-block px-3 pt-4 pb-3 border-b-2 border-sky-600 text-gray-900 font-semibold';
-                        @endphp
-                        @include('partials.menu-links', ['tabBase' => $tabBase, 'tabActive' => $tabActive])
-                    </nav>
-                </div>
-
-            </div>
+        <div class="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between gap-4">
+            <a href="{{ route('home') }}" class="text-sky-600 hover:text-sky-700">← Beranda</a>
+            <nav class="hidden md:flex items-center gap-6 text-sm">
+                @php
+                    $tabBase = 'text-gray-700 hover:text-sky-700';
+                    $tabActive = 'text-sky-700 font-medium';
+                @endphp
+                @include('partials.menu-links', ['tabBase' => $tabBase, 'tabActive' => $tabActive])
+            </nav>
         </div>
     </header>
 
