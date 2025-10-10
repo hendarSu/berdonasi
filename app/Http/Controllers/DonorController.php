@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Donation;
+use App\Models\Organization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -50,11 +51,13 @@ class DonorController extends Controller
         }
 
         $paginated = $donors->paginate(20)->withQueryString();
+        $org = Organization::query()->first();
 
         return view('donor.index', [
             'donors' => $paginated,
             'q' => $q,
             'sort' => $sort,
+            'org' => $org,
         ]);
     }
 }

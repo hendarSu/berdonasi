@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\News;
+use App\Models\Organization;
 use Illuminate\Http\Request;
 
 class NewsController extends Controller
@@ -27,9 +28,12 @@ class NewsController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
+        $org = Organization::query()->first();
+
         return view('news.index', [
             'news' => $news,
             'q' => $q,
+            'org' => $org,
         ]);
     }
 
@@ -51,9 +55,12 @@ class NewsController extends Controller
             ->take(3)
             ->get(['id','title','slug','published_at']);
 
+        $org = Organization::query()->first();
+
         return view('news.show', [
             'n' => $n,
             'latest' => $latest,
+            'org' => $org,
         ]);
     }
 }

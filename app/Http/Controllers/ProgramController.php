@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Campaign;
 use App\Models\Category;
+use App\Models\Organization;
 use Illuminate\Http\Request;
 
 class ProgramController extends Controller
@@ -31,11 +32,14 @@ class ProgramController extends Controller
 
         $categories = Category::query()->orderBy('name')->get(['id','name','slug']);
 
+        $org = Organization::query()->first();
+
         return view('program.index', [
             'campaigns' => $campaigns,
             'categories' => $categories,
             'activeCategory' => $categorySlug,
             'q' => $q,
+            'org' => $org,
         ]);
     }
 

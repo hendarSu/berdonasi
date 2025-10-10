@@ -32,6 +32,11 @@
         <meta name="twitter:image" content="{{ $metaImage }}">
     @endif
     @vite(['resources/css/app.css','resources/js/app.js'])
+    @php
+        $analytics = $org?->meta_json['analytics'] ?? [];
+        $gtmId = $analytics['gtm_id'] ?? null;
+    @endphp
+    @include('partials.gtm-head', ['gtmId' => $gtmId])
     <style>
         /* Hide Trix attachment captions (file names) under images */
         .prose figure.attachment .attachment__caption,
@@ -42,6 +47,7 @@
     </style>
 </head>
 <body class="bg-white text-gray-900">
+    @include('partials.gtm-body', ['gtmId' => $gtmId])
     <header class="bg-white border-b border-gray-200">
         <div class="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between gap-4">
             <a href="{{ route('news.index') }}" class="text-sky-600 hover:text-sky-700">← Kembali ke Berita</a>
