@@ -5,8 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Terima kasih — {{ env('APP_NAME') }}</title>
     @vite(['resources/css/app.css','resources/js/app.js'])
+    @php
+        $orgAnalytics = $donation->campaign?->organization?->meta_json['analytics'] ?? [];
+        $fbPixelId = $orgAnalytics['facebook_pixel_id'] ?? null;
+        $gtmId = $orgAnalytics['gtm_id'] ?? null;
+    @endphp
+    @if (!empty($gtmId))
+        <script>(function (w, d, s, l, i) {
+                w[l] = w[l] || []; w[l].push({
+                    'gtm.start':
+                        new Date().getTime(), event: 'gtm.js'
+                }); var f = d.getElementsByTagName(s)[0],
+                    j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                        'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+            })(window, document, 'script', 'dataLayer', '{{ $gtmId }}');</script>
+    @endif
+    @if (!empty($fbPixelId))
+        <script>
+            !function (f, b, e, v, n, t, s) {
+                if (f.fbq) return; n = f.fbq = function () {
+                    n.callMethod ?
+                    n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+                }; if (!f._fbq) f._fbq = n;
+                n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = []; t = b.createElement(e); t.async = !0;
+                t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s)
+            }(window, document, 'script',
+                'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', '{{ $fbPixelId }}');
+            fbq('track', 'PageView');
+        </script>
+        <noscript><img height="1" width="1" style="display:none"
+                 src="https://www.facebook.com/tr?id={{ $fbPixelId }}&ev=PageView&noscript=1" /></noscript>
+    @endif
 </head>
 <body class="bg-white text-gray-900">
+    @if (!empty($gtmId))
+        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ $gtmId }}" height="0" width="0"
+                    style="display:none;visibility:hidden"></iframe></noscript>
+    @endif
     <main class="bg-white mx-auto flex min-h-screen max-w-2xl items-center justify-center px-4">
         <div class="w-full bg-white p-8 text-center">
             <div class="mb-4 flex justify-center">
