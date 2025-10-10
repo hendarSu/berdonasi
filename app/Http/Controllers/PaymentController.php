@@ -101,7 +101,10 @@ class PaymentController extends Controller
 
     public function pay(Request $request, string $reference)
     {
-        $donation = Donation::query()->with('campaign')->where('reference', $reference)->firstOrFail();
+        $donation = Donation::query()
+            ->with(['campaign:id,title,slug,organization_id', 'campaign.organization:id,meta_json'])
+            ->where('reference', $reference)
+            ->firstOrFail();
 
         $midtrans = new MidtransService();
         $enabled = null;
@@ -221,7 +224,10 @@ class PaymentController extends Controller
     /** Show method list (Midtrans) allowing on/off + fee display. */
     public function methods(Request $request, string $reference)
     {
-        $donation = Donation::query()->with('campaign')->where('reference', $reference)->firstOrFail();
+        $donation = Donation::query()
+            ->with(['campaign:id,title,slug,organization_id', 'campaign.organization:id,meta_json'])
+            ->where('reference', $reference)
+            ->firstOrFail();
         $catalog = new PaymentMethodCatalog();
         $methods = $catalog->activeMidtrans();
         return view('donation.methods', [

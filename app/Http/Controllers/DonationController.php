@@ -10,7 +10,7 @@ class DonationController extends Controller
     public function thanks(Request $request, string $reference)
     {
         $donation = Donation::query()
-            ->with(['campaign:id,title,slug'])
+            ->with(['campaign:id,title,slug,organization_id', 'campaign.organization:id,meta_json'])
             ->where('reference', $reference)
             ->firstOrFail();
 
@@ -51,4 +51,3 @@ class DonationController extends Controller
         ]);
     }
 }
-
