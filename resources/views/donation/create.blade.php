@@ -152,7 +152,7 @@
                     <div class="mt-3 text-sm">
                         <div class="rounded-lg border border-gray-200 bg-white px-4 py-3">
                             <div class="mb-2 flex items-center gap-3">
-                                <span class="font-semibold">Rincian Pesanan</span>
+                                <span class="font-semibold">Rincian Donasi</span>
                                 <span class="flex-1 border-t border-gray-200"></span>
                             </div>
                             <div class="flex items-start justify-between py-1">

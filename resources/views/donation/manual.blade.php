@@ -44,8 +44,33 @@
                 <div class="text-2xl font-bold">Rp {{ number_format((float) $donation->amount, 0, ',', '.') }}</div>
             </div>
 
+            <div class="mt-3 text-sm">
+                <div class="rounded-lg border border-gray-200 bg-white px-4 py-3">
+                    <div class="mb-2 flex items-center gap-3">
+                        <span class="font-semibold">Rincian Donasi</span>
+                        <span class="flex-1 border-t border-gray-200"></span>
+                    </div>
+                    <div class="flex items-start justify-between py-1">
+                        <div class="text-gray-700"><span class="font-medium">(1x)</span> Donasi</div>
+                        <div id="sum-amount" class="font-medium">Rp {{ number_format((float) $donation->amount, 0, ',', '.') }}</div>
+                    </div>
+                    <div id="sum-fee-row" class="flex items-start justify-between py-1 hidden">
+                        <div>
+                            <div id="sum-fee-name" class="text-gray-700">Metode</div>
+                            <div id="sum-fee-text" class="text-xs text-gray-500">Admin fee</div>
+                        </div>
+                        <div id="sum-fee-amount" class="font-medium">Rp 0</div>
+                    </div>
+                    <div class="my-2 border-t border-dashed border-gray-200"></div>
+                    <div class="flex items-center justify-between">
+                        <div class="font-semibold text-green-700">Total</div>
+                        <div id="midtrans-total" class="font-bold text-green-700">Rp {{ number_format((float) $donation->amount, 0, ',', '.') }}</div>
+                    </div>
+                </div>
+            </div>
+
             <div class="mb-6">
-                <div class="mb-2 text-sm font-semibold">Informasi Rekening</div>
+                <div class="mb-2 mt-4 text-sm font-semibold">Informasi Rekening</div>
                 <div class="space-y-3">
                     <div class="flex flex-col gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
 
