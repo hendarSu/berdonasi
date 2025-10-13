@@ -7,6 +7,84 @@
     <title>
         {{ env('APP_NAME') }} — Beranda
     </title>
+    @php
+        $appName = env('APP_NAME');
+        $siteUrl = config('app.url') ?? url('/');
+        $homeUrl = route('home');
+        $siteName = $org->name ?? $appName ?? 'Berdonasi.id';
+        $metaDescription = 'Berdonasi.id adalah platform donasi online yang lahir dari semangat untuk memudahkan siapa pun berbuat kebaikan, kapan pun dan di mana pun. Kami percaya bahwa setiap niat baik, sekecil apa pun, dapat membawa perubahan besar bagi mereka yang membutuhkan.';
+        $hasHero = isset($heroes) && $heroes->count() > 0;
+        $firstHeroImage = $hasHero ? optional($heroes->first())->image_url : null;
+        $ogImage = $org->logo_url ?? $firstHeroImage ?? asset('favicon.ico');
+        $twitterCard = $ogImage ? 'summary_large_image' : 'summary';
+        $soc = $org->social_json ?? [];
+        $sameAs = array_values(array_filter([
+            $soc['instagram'] ?? null,
+            $soc['facebook'] ?? null,
+            $soc['twitter'] ?? ($soc['x'] ?? null),
+            $soc['youtube'] ?? null,
+            $soc['linkedin'] ?? null,
+            $soc['tiktok'] ?? null,
+        ]));
+    @endphp
+
+    <!-- Primary Meta -->
+    <meta name="description" content="{{ $metaDescription }}" />
+    <meta name="keywords" content="donasi online, sedekah, zakat, wakaf, galang dana, berdonasi, charity, amal, Indonesia" />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="{{ $siteName }}" />
+    <meta http-equiv="Content-Language" content="id-ID" />
+    <link rel="canonical" href="{{ $homeUrl }}" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:title" content="{{ $siteName }} — Beranda" />
+    <meta property="og:description" content="{{ $metaDescription }}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="{{ $homeUrl }}" />
+    <meta property="og:site_name" content="{{ $siteName }}" />
+    <meta property="og:locale" content="id_ID" />
+    @if ($ogImage)
+        <meta property="og:image" content="{{ $ogImage }}" />
+    @endif
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="{{ $twitterCard }}" />
+    <meta name="twitter:title" content="{{ $siteName }} — Beranda" />
+    <meta name="twitter:description" content="{{ $metaDescription }}" />
+    @if ($ogImage)
+        <meta name="twitter:image" content="{{ $ogImage }}" />
+    @endif
+
+    <!-- Brand / PWA niceties -->
+    <meta name="theme-color" content="#0ea5e9" />
+    <link rel="icon" href="/favicon.ico" />
+
+    <!-- Structured Data: WebSite -->
+    <script type="application/ld+json">
+    {!! json_encode([
+        '@context' => 'https://schema.org',
+        '@type' => 'WebSite',
+        'name' => $siteName,
+        'url' => $homeUrl,
+        'potentialAction' => [
+            '@type' => 'SearchAction',
+            'target' => $homeUrl . '?q={search_term_string}',
+            'query-input' => 'required name=search_term_string',
+        ],
+    ], JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}
+    </script>
+
+    <!-- Structured Data: Organization -->
+    <script type="application/ld+json">
+    {!! json_encode(array_filter([
+        '@context' => 'https://schema.org',
+        '@type' => 'Organization',
+        'name' => $siteName,
+        'url' => $siteUrl,
+        'logo' => $ogImage,
+        'sameAs' => !empty($sameAs) ? $sameAs : null,
+    ]), JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}
+    </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @php
         $analytics = $org?->meta_json['analytics'] ?? [];

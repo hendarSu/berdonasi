@@ -10,9 +10,13 @@ use App\Http\Controllers\MediaProxyController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\WaController;
 use App\Http\Controllers\DonationController;
+use App\Http\Controllers\SitemapController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/campaigns/chunk', [HomeController::class, 'chunk'])->name('home.chunk');
+// SEO: sitemap and robots
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
 Route::get('/program', [ProgramController::class, 'index'])->name('program.index');
 Route::get('/programs/chunk', [ProgramController::class, 'chunk'])->name('program.chunk');
 
