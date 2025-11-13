@@ -45,7 +45,7 @@
             @endif
         </article>
 
-        <aside class="lg:col-span-1">
+        <aside class="lg:col-span-1" style="margin-bottom: 75px;">
             <div class="sticky top-4 space-y-4">
                 <div class="rounded-md bg-white p-5 shadow">
                     <h2 class="mb-1 text-lg font-semibold">Dukung Campaign Ini</h2>
