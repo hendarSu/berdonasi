@@ -26,6 +26,12 @@ class PaymentMethodCatalog
                 'logo' => asset('images/payments/bri.png'),
                 'fee'  => ['type' => 'flat', 'value' => 4000],
             ],
+            'gopay' => [
+                'name' => 'GoPay',
+                'logo' => asset('images/payments/gopay.png'),
+                // Default fee can be adjusted via DB config_json
+                'fee'  => ['type' => 'percent', 'value' => 2.0],
+            ],
             'qris' => [
                 'name' => 'QRIS',
                 'logo' => asset('images/payments/qris.png'),

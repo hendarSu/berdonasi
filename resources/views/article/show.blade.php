@@ -27,7 +27,8 @@
         </div>
     </header>
 
-    <main class="mx-auto max-w-7xl px-4 py-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <!-- pb-24 added so fixed bottom action bar (Donasi/Bagikan) doesn't overlap page content on small screens -->
+    <main class="mx-auto max-w-7xl px-4 pt-8 pb-24 grid grid-cols-1 gap-6 lg:grid-cols-3">
         <article class="lg:col-span-2 space-y-3">
             <h1 class="text-2xl font-bold leading-tight">{{ $a->title }}</h1>
             <div class="text-sm text-gray-500">{{ optional($a->published_at)->format('d M Y') ?? '—' }}</div>
