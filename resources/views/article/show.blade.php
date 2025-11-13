@@ -28,7 +28,7 @@
     </header>
 
     <main class="mx-auto max-w-7xl px-4 pt-8 pb-24 grid grid-cols-1 gap-6 lg:grid-cols-3 mb-5">
-        <article class="lg:col-span-2 space-y-3">
+        <article class="lg:col-span-2 space-y-3" style="margin-bottom: 75px;">
             <h1 class="text-2xl font-bold leading-tight">{{ $a->title }}</h1>
             <div class="text-sm text-gray-500">{{ optional($a->published_at)->format('d M Y') ?? '—' }}</div>
             <div class="text-sm text-gray-600">Campaign: <a class="text-sky-600 hover:underline" href="{{ route('campaign.show', $c->slug) }}">{{ $c->title }}</a></div>
