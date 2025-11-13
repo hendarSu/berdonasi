@@ -46,6 +46,14 @@ class PaymentResource extends Resource
                 Tables\Columns\TextColumn::make('donation.campaign.title')
                     ->label('Campaign')
                     ->toggleable(),
+                Tables\Columns\TextColumn::make('donation.donor_name')
+                    ->label('Nama Donatur')
+                    ->searchable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('donation.donor_phone')
+                    ->label('No. WhatsApp')
+                    ->searchable()
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('method.provider')
                     ->label('Provider')
                     ->badge()
@@ -89,6 +97,32 @@ class PaymentResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')->dateTime()->label('Dibuat')->sortable(),
                 Tables\Columns\TextColumn::make('updated_at')->dateTime()->label('Diupdate')->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('keterangan')
+                    ->label('Keterangan')
+                    ->getStateUsing(function (Payment $record) {
+                        // Only show for manual payments
+                        if ($record->method?->provider !== 'manual') {
+                            return '-';
+                        }
+
+                        // Check if proof exists
+                        if (empty($record->manual_proof_path)) {
+                            return '⚠️ Belum upload bukti transfer';
+                        }
+
+                        // If proof exists, show status info
+                        if ($record->manual_status === 'approved') {
+                            return '✅ Bukti sudah diupload dan disetujui';
+                        } elseif ($record->manual_status === 'rejected') {
+                            return '❌ Bukti ditolak' . ($record->manual_note ? ': ' . $record->manual_note : '');
+                        } elseif ($record->manual_status === 'pending') {
+                            return '⏳ Bukti sudah diupload, menunggu review';
+                        }
+
+                        return '✓ Bukti sudah diupload';
+                    })
+                    ->wrap()
+                    ->toggleable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('provider_status')
@@ -124,8 +158,60 @@ class PaymentResource extends Resource
                     }),
             ])
             ->actions([
+                Tables\Actions\Action::make('follow_up')
+                    ->label('Follow Up')
+                    ->icon('heroicon-o-chat-bubble-left-right')
+                    ->color('info')
+                    ->visible(fn (Payment $record) =>
+                        !in_array($record->provider_status, ['settlement', 'capture']) &&
+                        !empty($record->donation?->donor_phone)
+                    )
+                    ->form([
+                        Forms\Components\Textarea::make('message')
+                            ->label('Pesan Follow Up')
+                            ->placeholder('Ketik pesan follow up untuk donatur...')
+                            ->rows(5)
+                            ->required()
+                            ->default(function (Payment $record) {
+                                $donorName = $record->donation?->donor_name ?? 'Bapak/Ibu';
+                                $campaignTitle = $record->donation?->campaign?->title ?? '';
+                                $amount = number_format((float)($record->donation?->amount ?? 0), 0, ',', '.');
+
+                                return "Assalamu'alaikum Kak {$donorName},\n\n"
+                                    . "Terima kasih atas niat baik Anda untuk berdonasi di campaign: {$campaignTitle}\n\n"
+                                    . "Kami perhatikan pembayaran sebesar Rp {$amount} belum terselesaikan.\n\n"
+                                    . "Apakah ada yang bisa kami bantu?\n\n"
+                                    . "Terima kasih.";
+                            }),
+                    ])
+                    ->action(function (Payment $record, array $data) {
+                        $phone = $record->donation?->donor_phone;
+                        if (empty($phone)) {
+                            return;
+                        }
+
+                        // Clean phone number (remove non-digits)
+                        $phone = preg_replace('/[^0-9]/', '', $phone);
+
+                        // Convert to international format if starts with 0
+                        if (str_starts_with($phone, '0')) {
+                            $phone = '62' . substr($phone, 1);
+                        }
+
+                        // URL encode the message
+                        $message = urlencode($data['message']);
+
+                        // Construct WhatsApp URL
+                        $waUrl = "https://wa.me/{$phone}?text={$message}";
+
+                        // Redirect to WhatsApp in new tab
+                        return redirect()->away($waUrl);
+                    })
+                    ->modalSubmitActionLabel('Kirim ke WhatsApp')
+                    ->modalCancelActionLabel('Batal'),
                 Tables\Actions\Action::make('payload')
                     ->label('Payload')
+                    ->visible(fn (Payment $record) => $record->method?->provider !== 'manual')
                     ->modalHeading('Payload Detail')
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Tutup')
