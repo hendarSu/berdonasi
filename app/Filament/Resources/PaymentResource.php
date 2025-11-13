@@ -95,8 +95,16 @@ class PaymentResource extends Resource
                     ->label('Net')
                     ->formatStateUsing(fn ($state) => 'Rp ' . number_format((float) $state, 2, ',', '.'))
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')->dateTime()->label('Dibuat')->sortable(),
-                Tables\Columns\TextColumn::make('updated_at')->dateTime()->label('Diupdate')->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Dibuat')
+                    ->dateTime('d M Y, H:i')
+                    ->timezone('Asia/Jakarta')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->label('Diupdate')
+                    ->dateTime('d M Y, H:i')
+                    ->timezone('Asia/Jakarta')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('keterangan')
                     ->label('Keterangan')
                     ->getStateUsing(function (Payment $record) {
