@@ -199,6 +199,11 @@
                                                          class="mb-2 inline-block rounded-full bg-orange-50 px-2 py-1 text-xs text-orange-700 ring-1 ring-orange-200">
                                                         Anggaran: Rp {{ number_format((float) $a->payout->amount, 2, ',', '.') }}</div>
                                                 @endif
+                                                @if ($a->cover_url)
+                                                    <div class="mb-2 flex flex-wrap gap-2">
+                                                        <img src="{{ $a->cover_url }}" alt="Laporan Gambar" class="h-20 w-32 object-cover rounded shadow js-media-click cursor-zoom-in" />
+                                                    </div>
+                                                @endif
                                                 @if ($a->body_md)
                                                     <div class="prose max-w-none text-gray-700">
                                                         {{ \Illuminate\Support\Str::limit(strip_tags($a->body_md), 280) }}
