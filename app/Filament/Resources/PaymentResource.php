@@ -16,6 +16,9 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Donation;
 use App\Models\Wallet;
 use App\Models\LedgerEntry;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 
 class PaymentResource extends Resource
 {
@@ -389,6 +392,14 @@ class PaymentResource extends Resource
                             $donation->save();
                         }
                     }),
+            ])
+            ->headerActions([
+                ExportAction::make()
+                    ->exports([
+                        ExcelExport::make()
+                            ->fromTable()
+                            ->withFilename(fn () => 'payments-' . date('Y-m-d-His')),
+                    ]),
             ])
             ->bulkActions([])
             ->defaultSort('id', 'desc');
