@@ -133,27 +133,46 @@ class PaymentResource extends Resource
                     ->toggleable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('provider_status')
+                Tables\Filters\SelectFilter::make('campaign')
+                    ->label('Campaign')
+                    ->relationship('donation.campaign', 'title')
+                    ->searchable()
+                    ->preload(),
+                Tables\Filters\SelectFilter::make('provider')
+                    ->label('Payment Provider')
                     ->options([
-                        'initiated' => 'initiated',
-                        'pending' => 'pending',
-                        'capture' => 'capture',
-                        'settlement' => 'settlement',
-                        'expire' => 'expire',
-                        'cancel' => 'cancel',
-                        'deny' => 'deny',
-                        'failed' => 'failed',
-                    ]),
-                Tables\Filters\SelectFilter::make('manual_status')
-                    ->label('Manual Status')
-                    ->options([
-                        'pending' => 'pending',
-                        'approved' => 'approved',
-                        'rejected' => 'rejected',
-                    ]),
-                Tables\Filters\SelectFilter::make('method_id')
-                    ->relationship('method', 'method_code')
-                    ->label('Method'),
+                        'manual' => 'Manual',
+                        'midtrans' => 'Midtrans',
+                    ])
+                    ->query(function ($query, array $data) {
+                        if (isset($data['value']) && $data['value'] !== '') {
+                            return $query->whereHas('method', function ($q) use ($data) {
+                                $q->where('provider', $data['value']);
+                            });
+                        }
+                        return $query;
+                    }),
+                // Tables\Filters\SelectFilter::make('provider_status')
+                //     ->options([
+                //         'initiated' => 'initiated',
+                //         'pending' => 'pending',
+                //         'capture' => 'capture',
+                //         'settlement' => 'settlement',
+                //         'expire' => 'expire',
+                //         'cancel' => 'cancel',
+                //         'deny' => 'deny',
+                //         'failed' => 'failed',
+                //     ]),
+                // Tables\Filters\SelectFilter::make('manual_status')
+                //     ->label('Manual Status')
+                //     ->options([
+                //         'pending' => 'pending',
+                //         'approved' => 'approved',
+                //         'rejected' => 'rejected',
+                //     ]),
+                // Tables\Filters\SelectFilter::make('method_id')
+                //     ->relationship('method', 'method_code')
+                //     ->label('Method'),
                 Filter::make('created_at')
                     ->form([
                         Forms\Components\DatePicker::make('from')->label('Dari'),
