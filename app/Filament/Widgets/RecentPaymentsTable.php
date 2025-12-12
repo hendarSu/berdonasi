@@ -6,6 +6,7 @@ use App\Models\Payment;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Support\Carbon;
 
 class RecentPaymentsTable extends BaseWidget
 {
@@ -15,6 +16,8 @@ class RecentPaymentsTable extends BaseWidget
 
     public function table(Table $table): Table
     {
+        $timezone = 'Asia/Jakarta';
+
         return $table
             ->query(
                 Payment::query()->with(['donation.campaign', 'method'])->latest('id')
@@ -26,7 +29,9 @@ class RecentPaymentsTable extends BaseWidget
                 Tables\Columns\TextColumn::make('provider_status')->label('Status')->badge(),
                 Tables\Columns\TextColumn::make('net_amount')->label('Net')
                     ->formatStateUsing(fn ($state) => 'Rp ' . number_format((float)$state, 2, ',', '.')),
-                Tables\Columns\TextColumn::make('created_at')->dateTime()->label('Dibuat'),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Dibuat')
+                    ->formatStateUsing(fn ($state) => Carbon::parse($state, 'UTC')->setTimezone($timezone)->format('d M Y H:i')),
             ])
             ->paginated([5,10,25])
             ->defaultPaginationPageOption(10);

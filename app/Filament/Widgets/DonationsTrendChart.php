@@ -5,7 +5,6 @@ namespace App\Filament\Widgets;
 use App\Models\Payment;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class DonationsTrendChart extends ChartWidget
 {
@@ -14,25 +13,27 @@ class DonationsTrendChart extends ChartWidget
     protected static ?int $sort = 1;
     protected function getData(): array
     {
-        $start = now()->subDays(29)->startOfDay();
-        $end = now()->endOfDay();
+        $timezone = 'Asia/Jakarta';
+        $startLocal = now($timezone)->subDays(29)->startOfDay();
+        $endLocal = now($timezone)->endOfDay();
+        $startUtc = $startLocal->copy()->setTimezone('UTC');
+        $endUtc = $endLocal->copy()->setTimezone('UTC');
 
-        $rows = Payment::query()
-            ->selectRaw('DATE(donations.paid_at) as d, SUM(payments.net_amount) as total')
+        $totalsByDate = Payment::query()
+            ->select(['payments.net_amount', 'donations.paid_at'])
             ->join('donations', 'donations.id', '=', 'payments.donation_id')
             ->where('donations.status', 'paid')
-            ->whereBetween('donations.paid_at', [$start, $end])
-            ->groupBy('d')
-            ->orderBy('d')
+            ->whereBetween('donations.paid_at', [$startUtc, $endUtc])
             ->get()
-            ->keyBy('d');
+            ->groupBy(fn ($row) => Carbon::parse($row->paid_at, 'UTC')->setTimezone($timezone)->toDateString())
+            ->map(fn ($items) => (float) $items->sum('net_amount'));
 
         $labels = [];
         $data = [];
         for ($i = 0; $i < 30; $i++) {
-            $date = $start->copy()->addDays($i)->toDateString();
+            $date = $startLocal->copy()->addDays($i)->toDateString();
             $labels[] = $date;
-            $data[] = (float) ($rows[$date]->total ?? 0);
+            $data[] = (float) ($totalsByDate[$date] ?? 0);
         }
 
         return [
@@ -55,4 +56,3 @@ class DonationsTrendChart extends ChartWidget
         return 'line';
     }
 }
-

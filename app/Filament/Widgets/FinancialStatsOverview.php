@@ -7,7 +7,6 @@ use App\Models\Payout;
 use App\Models\Wallet;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Card;
-use Illuminate\Support\Carbon;
 
 class FinancialStatsOverview extends BaseWidget
 {
@@ -15,14 +14,22 @@ class FinancialStatsOverview extends BaseWidget
 
     protected function getCards(): array
     {
-        $today = now()->toDateString();
-        $startMonth = now()->startOfMonth()->toDateString();
+        $timezone = 'Asia/Jakarta';
+        $nowTz = now($timezone);
+        $todayRangeUtc = [
+            $nowTz->copy()->startOfDay()->setTimezone('UTC'),
+            $nowTz->copy()->endOfDay()->setTimezone('UTC'),
+        ];
+        $monthRangeUtc = [
+            $nowTz->copy()->startOfMonth()->startOfDay()->setTimezone('UTC'),
+            $todayRangeUtc[1],
+        ];
 
         $paidPayments = Payment::query()->whereHas('donation', fn ($q) => $q->where('status', 'paid'));
 
         $totalNet = (float) ($paidPayments->clone()->sum('net_amount') ?? 0);
-        $todayNet = (float) ($paidPayments->clone()->whereHas('donation', fn ($q) => $q->whereDate('paid_at', $today))->sum('net_amount') ?? 0);
-        $monthNet = (float) ($paidPayments->clone()->whereHas('donation', fn ($q) => $q->whereDate('paid_at', '>=', $startMonth))->sum('net_amount') ?? 0);
+        $todayNet = (float) ($paidPayments->clone()->whereHas('donation', fn ($q) => $q->whereBetween('paid_at', $todayRangeUtc))->sum('net_amount') ?? 0);
+        $monthNet = (float) ($paidPayments->clone()->whereHas('donation', fn ($q) => $q->whereBetween('paid_at', $monthRangeUtc))->sum('net_amount') ?? 0);
 
         $walletBalance = (float) (Wallet::query()->sum('balance') ?? 0);
         $payoutCompleted = (float) (Payout::query()->where('status', 'completed')->sum('amount') ?? 0);
@@ -45,4 +52,3 @@ class FinancialStatsOverview extends BaseWidget
         ];
     }
 }
-
